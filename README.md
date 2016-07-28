@@ -62,12 +62,12 @@ Only consists of initilization & default options.
 
 
 ## Emitted Events
-`cy.on("start_resize_{LOCATION}", func)`
+`cy.on("resizestart", function(e, type){ })`
 
-`cy.on("end_resize_{LOCATION}", func)`
+`cy.on("resizeend", function(e, type){ })`
 
 
-`{LOCATION}` can be `topleft`, `topcenter`, `topright`, `centerright`, 
+`type` param can be `topleft`, `topcenter`, `topright`, `centerright`, 
 `bottomright`, `bottomcenter`, `bottomleft`, `centerleft`
 
 

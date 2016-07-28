@@ -85,10 +85,17 @@
 							{ data: { source: 'k', target: 'g' } },
 							{ data: { source: 'g', target: 'j' } }
 						]
-					},
+					}
 				});
 
 				cy.nodeResize();
+
+				cy.on("resizestart", function (e, type) {
+					console.log(type);
+				});
+				cy.on("resizeend", function (e, type) {
+					console.log(type);
+				});
 
 			});
 		</script>

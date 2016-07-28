@@ -57,14 +57,12 @@
       });
 
       var clearDrawing = function () {
-        var width = $container.width();
-        var height = $container.height();
 
         canvas.reset();
 
       };
 
-      var drawGrapple = function (x, y, t, node) {
+      var drawGrapple = function (x, y, t) {
         var grapple = canvas.display.rectangle({
           x: x,
           y: y,
@@ -85,7 +83,7 @@
           cy.autounselectify(true);
           cy.autoungrabify(true);
           nodes = cy.nodes(":selected");
-          cy.trigger("start_resize_" + t);
+          cy.trigger("resizestart", [t]);
           canvas.bind("touchmove mousemove", eMouseMove);
           canvas.bind("touchend mouseup", eMouseUp);
         };
@@ -98,7 +96,7 @@
             cy.$().unselect();
             nodes.select();
           }, 0);
-          cy.trigger("end_resize_" + t);
+          cy.trigger("resizeend", [t]);
           canvas.unbind("touchmove mousemove", eMouseMove);
           canvas.unbind("touchend mouseup", eMouseUp);
         };
@@ -139,7 +137,6 @@
         };
 
         grapple.bind("touchstart mousedown", eMouseDown);
-        var startPos = {};
 
 
         return grapple;
