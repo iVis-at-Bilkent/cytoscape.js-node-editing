@@ -5,7 +5,7 @@ cytoscape-node-resize
 ## Description
 Provides grapples to resize nodes.
 
-![Image of extension](img.jpg)
+![Image of extension](img.png)
 
 
 
