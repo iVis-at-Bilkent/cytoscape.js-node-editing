@@ -62,7 +62,12 @@ Only consists of initilization & default options.
 
 
 ## Emitted Events
-`cy.on("start_resize_{LOCATION}", func)` and `{LOCATION}` can be `topleft`, `topcenter`, `topright`, `centerright`, 
+`cy.on("start_resize_{LOCATION}", func)`
+
+`cy.on("end_resize_{LOCATION}", func)`
+
+
+`{LOCATION}` can be `topleft`, `topcenter`, `topright`, `centerright`, 
 `bottomright`, `bottomcenter`, `bottomleft`, `centerleft`
 
 
