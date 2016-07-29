@@ -27,14 +27,15 @@ Download the library:
 CommonJS:
 ```js
 var cytoscape = require('cytoscape');
-var nodeResize = require('oCanvas');
+var nodeResize = require('cytoscape-node-resize');
+var oCanvas = require('oCanvas');
 
 nodeResize( cytoscape, jQuery, oCanvas ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-node-resize'], function( cytoscape, nodeResize, jQuery, oCanvas ){
+require(['cytoscape', 'cytoscape-node-resize', "jquery", "oCanvas], function( cytoscape, nodeResize, jQuery, oCanvas ){
   nodeResize( cytoscape, jQuery, oCanvas ); // register extension
 });
 ```
