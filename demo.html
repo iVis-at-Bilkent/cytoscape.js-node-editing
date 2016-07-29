@@ -93,8 +93,9 @@
 				cy.on("resizestart", function (e, type) {
 					console.log(type);
 				});
+
 				cy.on("resizeend", function (e, type) {
-					console.log(type);
+					document.body.style.cursor = 'initial';
 				});
 
 			});

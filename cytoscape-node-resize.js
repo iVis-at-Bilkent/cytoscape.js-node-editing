@@ -14,7 +14,18 @@
       boundingRectangle: true, // enable/disable bounding rectangle
       boundingRectangleStroke: "1.5px red", // style bounding rectangle
 
-      minNodeSize: 15 // minimum width/height of node to be set
+      minNodeSize: 15, // minimum width/height of node to be set
+      cursors: {
+        default: "default", // to be set after resizing finished
+        nw: "nw-resize",
+        n: "n-resize",
+        ne: "ne-resize",
+        e: "e-resize",
+        se: "se-resize",
+        s: "s-resize",
+        sw: "sw-resize",
+        w: "w-resize"
+      }
     };
 
     cytoscape( 'core', 'nodeResize', function(opts){
@@ -62,7 +73,7 @@
 
       };
 
-      var drawGrapple = function (x, y, t) {
+      var drawGrapple = function (x, y, t, n, cur) {
         var grapple = canvas.display.rectangle({
           x: x,
           y: y,
@@ -76,6 +87,7 @@
         var startPos = { };
         var nodes;
         var eMouseDown = function () {
+          canvas.mouse.cursor(cur);
           startPos.x = this.core.pointer.x;
           startPos.y = this.core.pointer.y;
           cy.boxSelectionEnabled(false);
@@ -84,10 +96,13 @@
           cy.autoungrabify(true);
           nodes = cy.nodes(":selected");
           cy.trigger("resizestart", [t]);
+          grapple.unbind("touchleave mouseleave", eMouseLeave);
+          grapple.unbind("touchenter mouseenter", eMouseEnter);
           canvas.bind("touchmove mousemove", eMouseMove);
           canvas.bind("touchend mouseup", eMouseUp);
         };
         var eMouseUp = function () {
+          canvas.mouse.cursor(options.cursors.default);
           cy.boxSelectionEnabled(true);
           cy.panningEnabled(true);
           cy.autounselectify(false);
@@ -99,6 +114,7 @@
           cy.trigger("resizeend", [t]);
           canvas.unbind("touchmove mousemove", eMouseMove);
           canvas.unbind("touchend mouseup", eMouseUp);
+          grapple.bind("touchenter mouseenter", eMouseEnter);
         };
         var eMouseMove = function () {
           var core = this;
@@ -136,7 +152,18 @@
 
         };
 
+        var eMouseEnter = function () {
+          canvas.mouse.cursor(cur);
+          grapple.bind("touchleave mouseleave", eMouseLeave);
+        };
+
+        var eMouseLeave = function () {
+          canvas.mouse.cursor(options.cursors.default);
+          grapple.unbind("touchleave mouseleave", eMouseLeave);
+        };
+
         grapple.bind("touchstart mousedown", eMouseDown);
+        grapple.bind("touchenter mouseenter", eMouseEnter);
 
 
         return grapple;
@@ -166,14 +193,14 @@
 
         // Clock turning
         var grapples = {
-          "topleft": drawGrapple(startPos.x - gs/2, startPos.y - gs/2, "topleft", node),
-          "topcenter": drawGrapple(startPos.x + width/2 - gs/2, startPos.y - gs/2, "topcenter", node),
-          "topright": drawGrapple(startPos.x + width - gs/2, startPos.y - gs/2, "topright", node),
-          "centerright": drawGrapple(startPos.x + width - gs/2, startPos.y + height/2 - gs/2, "centerright", node),
-          "bottomright": drawGrapple(startPos.x + width - gs/2, startPos.y + height - gs/2, "bottomright", node),
-          "bottomcenter": drawGrapple(startPos.x + width/2 - gs/2, startPos.y + height - gs/2, "bottomcenter", node),
-          "bottomleft": drawGrapple(startPos.x - gs/2, startPos.y + height - gs/2, "bottomleft", node),
-          "centerleft": drawGrapple(startPos.x - gs/2, startPos.y + height/2 - gs/2, "centerleft", node)
+          "topleft": drawGrapple(startPos.x - gs/2, startPos.y - gs/2, "topleft", node, options.cursors.nw),
+          "topcenter": drawGrapple(startPos.x + width/2 - gs/2, startPos.y - gs/2, "topcenter", node,  options.cursors.n),
+          "topright": drawGrapple(startPos.x + width - gs/2, startPos.y - gs/2, "topright", node, options.cursors.ne),
+          "centerright": drawGrapple(startPos.x + width - gs/2, startPos.y + height/2 - gs/2, "centerright", node, options.cursors.e),
+          "bottomright": drawGrapple(startPos.x + width - gs/2, startPos.y + height - gs/2, "bottomright", node, options.cursors.se),
+          "bottomcenter": drawGrapple(startPos.x + width/2 - gs/2, startPos.y + height - gs/2, "bottomcenter", node, options.cursors.s),
+          "bottomleft": drawGrapple(startPos.x - gs/2, startPos.y + height - gs/2, "bottomleft", node, options.cursors.sw),
+          "centerleft": drawGrapple(startPos.x - gs/2, startPos.y + height/2 - gs/2, "centerleft", node, options.cursors.w)
         };
 
 
