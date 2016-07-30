@@ -116,8 +116,10 @@
             cy.panningEnabled(true);
             cy.autounselectify(false);
             cy.autoungrabify(false);
-            cy.$().unselect();
-            selectedEles.select();
+            setTimeout(function () {
+              cy.$().unselect();
+              selectedEles.select();
+            }, 0);
             canvas.unbind("touchend mouseup", eMouseUp);
           };
 
