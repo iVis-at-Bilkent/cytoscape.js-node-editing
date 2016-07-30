@@ -139,7 +139,13 @@
         var startPos = { };
         var nodes;
         var selectedEles;
+        var tmpActiveBgOpacity;
         var eMouseDown = function () {
+          tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
+          cy.style()
+              .selector("core")
+                .style("active-bg-opacity", 0)
+              .update();
           canvas.mouse.cursor(cur);
           startPos.x = this.core.pointer.x;
           startPos.y = this.core.pointer.y;
@@ -156,6 +162,10 @@
           canvas.bind("touchend mouseup", eMouseUp);
         };
         var eMouseUp = function () {
+          cy.style()
+              .selector("core")
+              .style("active-bg-opacity", tmpActiveBgOpacity)
+              .update();
           canvas.mouse.cursor(options.cursors.default);
           cy.boxSelectionEnabled(true);
           cy.panningEnabled(true);
