@@ -16,7 +16,7 @@
 
       minNodeSize: 15, // minimum width/height of node to be set
 
-      aspectedResizeModeSelector: ".aspectedResizeMode",// with only 4 active grapples (at corners)
+      fixedAspectRatioResizeModeSelector: ".fixedAspectRatioResizeMode",// with only 4 active grapples (at corners)
       noResizeModeSelector: ".noResizeMode", // no active grapples
 
       cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
@@ -80,7 +80,7 @@
       };
 
       var drawGrapple = function (x, y, t, n, cur) {
-        if (n.is(options.noResizeModeSelector) || (n.is(options.aspectedResizeModeSelector) && t.indexOf("center") >= 0)) {
+        if (n.is(options.noResizeModeSelector) || (n.is(options.fixedAspectRatioResizeModeSelector) && t.indexOf("center") >= 0)) {
           var inactiveGrapple = canvas.display.rectangle({
             x: x,
             y: y,
@@ -183,7 +183,7 @@
               var node = nodes[i];
 
 
-              var isAspectedMode = node.is(options.aspectedResizeModeSelector);
+              var isAspectedMode = node.is(options.fixedAspectRatioResizeModeSelector);
               if ((isAspectedMode && t.indexOf("center") >= 0) ||
                     node.is(options.noResizeModeSelector))
                   continue;
@@ -191,11 +191,14 @@
               if (isAspectedMode){
                 var aspectRatio = node.height()/node.width();
 
-                var aspectedSize =  Math.max(Math.abs(xWidth), Math.abs(xHeight));
-                var aspectedHeight = aspectedSize * aspectRatio;
-                var aspectedWidth = aspectedSize;
-                xWidth = xWidth > 0 ? aspectedWidth : -aspectedWidth;
-                xHeight = xHeight > 0 ? aspectedHeight : -aspectedHeight;
+                var aspectedSize = Math.min(xWidth, xHeight);
+
+                var isCrossCorners = (t == "topright") || (t == "bottomleft");
+                if (xWidth > xHeight)
+                  xHeight = xWidth * aspectRatio * (isCrossCorners ? -1 : 1);
+                 else
+                  xWidth = xHeight / aspectRatio * (isCrossCorners ? -1 : 1);
+
               }
 
 

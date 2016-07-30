@@ -53,14 +53,19 @@ Only consists of initilization & default options.
             
                   grappleSize: 8, // size of square dots
                   grappleColor: "green", // color of grapples
-            
+                  inactiveGrappleStroke: "outside 1px blue",
                   boundingRectangle: true, // enable/disable bounding rectangle
                   boundingRectangleStroke: "1.5px red", // style bounding rectangle
             
                   minNodeSize: 15, // minimum width/height of node to be set
+            
+                  fixedAspectRatioResizeModeSelector: ".fixedAspectRatioResizeMode",// with only 4 active grapples (at corners)
+                  noResizeModeSelector: ".noResizeMode", // no active grapples
+            
                   cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
                     // May take any "cursor" css property
                     default: "default", // to be set after resizing finished or mouseleave
+                    inactive: "not-allowed",
                     nw: "nw-resize",
                     n: "n-resize",
                     ne: "ne-resize",
