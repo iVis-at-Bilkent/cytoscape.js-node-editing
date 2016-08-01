@@ -95,7 +95,11 @@
 
             var getGrappleSize = function () {
                 return Math.max(1, cy.zoom()) * options.grappleSize;
-            }
+            };
+
+            var getPadding = function () {
+                return options.padding*Math.max(1, cy.zoom());
+            };
 
             var drawGrapple = function (x, y, t, n, cur) {
                 if (options.isNoResizeMode(n) || (options.isFixedAspectRatioResizeMode(n) && t.indexOf("center") >= 0)) {
@@ -282,8 +286,8 @@
 
             var drawGrapples = function (node) {
                 var nodePos = node.renderedPosition();
-                var width = node.renderedWidth() + options.padding*Math.max(1, cy.zoom());
-                var height = node.renderedHeight() + options.padding*Math.max(1, cy.zoom());
+                var width = node.renderedWidth() + getPadding();
+                var height = node.renderedHeight() + getPadding();
                 var startPos = {
                     x: nodePos.x - width / 2,
                     y: nodePos.y - height / 2
