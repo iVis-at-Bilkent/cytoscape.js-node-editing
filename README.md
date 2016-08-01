@@ -14,27 +14,29 @@ Only consists of initilization & default options.
 
 ```js
             cy.nodeResize({
-                  padding: 20, // spacing between node and grapples/rectangle
-            
-                  grappleSize: 8, // size of square dots
-                  grappleColor: "green", // color of grapples
-                  inactiveGrappleStroke: "outside 1px blue",
-                  boundingRectangle: true, // enable/disable bounding rectangle
-                  boundingRectangleStroke: "1.5px red", // style bounding rectangle
-            
-                  minWidth: function (node) {
+                padding: 20, // spacing between node and grapples/rectangle
+                undoable: true, // and if cy.undoRedo exists
+    
+                grappleSize: 8, // size of square dots
+                grappleColor: "green", // color of grapples
+                inactiveGrappleStroke: "outside 1px blue",
+                boundingRectangle: true, // enable/disable bounding rectangle
+                boundingRectangleStroke: "1.5px red", // style bounding rectangle
+                zIndex: 999,
+    
+                minWidth: function (node) {
                     var data = node.data("resizeMinWidth");
                     return data ? data : 15;
-                  }, // a function returns min width of node
-                  minHeight: function (node) {
+                }, // a function returns min width of node
+                minHeight: function (node) {
                     var data = node.data("resizeMinHeight");
                     return data ? data : 15;
-                  }, // a function returns min height of node
-            
-                  fixedAspectRatioResizeModeSelector: ".fixedAspectRatioResizeMode",// with only 4 active grapples (at corners)
-                  noResizeModeSelector: ".noResizeMode", // no active grapples
-            
-                  cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
+                }, // a function returns min height of node
+    
+                fixedAspectRatioResizeModeSelector: ".fixedAspectRatioResizeMode",// with only 4 active grapples (at corners)
+                noResizeModeSelector: ".noResizeMode", // no active grapples
+    
+                cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
                     // May take any "cursor" css property
                     default: "default", // to be set after resizing finished or mouseleave
                     inactive: "not-allowed",
@@ -46,7 +48,7 @@ Only consists of initilization & default options.
                     s: "s-resize",
                     sw: "sw-resize",
                     w: "w-resize"
-                  }
+                }
              });
 ```
 
@@ -55,6 +57,7 @@ Only consists of initilization & default options.
 
  * Cytoscape.js ^2.7.0
  * oCanvas ^2.8.0
+ * cytoscape-undo-redo ^1.0.10
 
 
 ## Usage instructions
@@ -86,14 +89,15 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 
 ## Emitted Events
-`cy.on("resizestart", function(e, type){ })`
+`cy.on("resizestart", function(e, type, nodes){ })`
 
-`cy.on("resizeend", function(e, type){ })`
+`cy.on("resizeend", function(e, type, nodes){ })`
 
 
 `type` param can be `topleft`, `topcenter`, `topright`, `centerright`, 
 `bottomright`, `bottomcenter`, `bottomleft`, `centerleft`
 
+`nodes` param corresponds to currently resizing nodes.
 
 ## Publishing instructions
 
