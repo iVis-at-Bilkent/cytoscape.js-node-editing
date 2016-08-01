@@ -14,7 +14,14 @@
       boundingRectangle: true, // enable/disable bounding rectangle
       boundingRectangleStroke: "1.5px red", // style bounding rectangle
 
-      minNodeSize: 15, // minimum width/height of node to be set
+      minWidth: function (node) {
+        var data = node.data("resizeMinWidth");
+        return data ? data : 15;
+      }, // a function returns min with of node
+      minHeight: function (node) {
+        var data = node.data("resizeMinHeight");
+        return data ? data : 15;
+      }, // a function returns min height of node
 
       fixedAspectRatioResizeModeSelector: ".fixedAspectRatioResizeMode",// with only 4 active grapples (at corners)
       noResizeModeSelector: ".noResizeMode", // no active grapples
@@ -216,18 +223,26 @@
 
               var nodePos = node.position();
 
-              if (t.startsWith("top") && node.height() - xHeight > options.minNodeSize) {
-                node.position("y", nodePos.y + xHeight/2);
-                node.css("height", node.height() - xHeight);
-              } else if(t.startsWith("bottom") && node.height() + xHeight > options.minNodeSize) {
-                node.position("y", nodePos.y + xHeight/2);
-                node.css("height", node.height() + xHeight);
+              if (t.startsWith("top")) {
+                if ( node.height() - xHeight > options.minHeight(node)) {
+                  node.position("y", nodePos.y + xHeight / 2);
+                  node.css("height", node.height() - xHeight);
+                } else if (isAspectedMode)
+                  continue;
+              } else if(t.startsWith("bottom")) {
+                if (node.height() + xHeight > options.minHeight(node)) {
+                  node.position("y", nodePos.y + xHeight / 2);
+                  node.css("height", node.height() + xHeight);
+                } else if (isAspectedMode)
+                    continue;
               }
 
-              if (t.endsWith("left") && node.width() - xWidth > options.minNodeSize) {
+              if (t.endsWith("left")) {
+                if (node.width() - xWidth > options.minWidth(node))
+                    continue;
                 node.position("x", nodePos.x + xWidth/2);
                 node.css("width", node.width() - xWidth);
-              } else if (t.endsWith("right") && node.width() + xWidth > options.minNodeSize) {
+              } else if (t.endsWith("right") && node.width() + xWidth > options.minWidth(node)) {
                 node.position("x", nodePos.x + xWidth/2);
                 node.css("width", node.width() + xWidth);
               }
