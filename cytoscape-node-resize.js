@@ -16,7 +16,9 @@
             grappleColor: "green", // color of grapples
             inactiveGrappleStroke: "outside 1px blue",
             boundingRectangle: true, // enable/disable bounding rectangle
-            boundingRectangleStroke: "1.5px red", // style bounding rectangle
+            boundingRectangleLineDash: [4, 8], // line dash of bounding rectangle
+            boundingRectangleLineColor: "red",
+            boundingRectangleLineWidth: 1.5,
             zIndex: 999,
 
             minWidth: function (node) {
@@ -82,6 +84,36 @@
 
             $(window).on('resize', resizeCanvas);
             resizeCanvas();
+
+            oCanvas.registerDisplayObject("dashedRectangle", function (settings, core) {
+
+                return oCanvas.extend({
+                    core: core,
+
+                    shapeType: "rectangular",
+
+                    draw: function () {
+                        var canvas = this.core.canvas,
+                            origin = this.getOrigin(),
+                            x = this.abs_x - origin.x,
+                            y = this.abs_y - origin.y,
+                            width = this.width,
+                            height = this.height;
+
+                        canvas.beginPath();
+
+
+                        if (this.lineWidth > 0) {
+                            canvas.strokeStyle = this.lineColor;
+                            canvas.lineWidth = this.lineWidth;
+                            canvas.setLineDash(this.lineDash);
+                            canvas.strokeRect(x, y, width, height);
+                        }
+
+                        canvas.closePath();
+                    }
+                }, settings);
+            });
 
             var canvas = oCanvas.create({
                 canvas: "#node-resize"
@@ -294,12 +326,14 @@
                 };
 
                 if (options.boundingRectangle) {
-                    var rect = canvas.display.rectangle({
+                    var rect = canvas.display.dashedRectangle({
                         x: startPos.x,
                         y: startPos.y,
                         width: width,
                         height: height,
-                        stroke: options.boundingRectangleStroke
+                        lineColor: options.boundingRectangleLineColor,
+                        lineWidth: options.boundingRectangleLineWidth,
+                        lineDash: options.boundingRectangleLineDash
                     });
                     canvas.addChild(rect);
                 }
