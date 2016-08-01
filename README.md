@@ -57,7 +57,7 @@ Only consists of initilization & default options.
 
  * Cytoscape.js ^2.7.0
  * oCanvas ^2.8.0
- * cytoscape-undo-redo ^1.0.10
+ * cytoscape-undo-redo ^1.0.10 (optional)
 
 
 ## Usage instructions

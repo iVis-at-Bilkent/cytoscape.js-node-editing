@@ -29,7 +29,7 @@
             }, // a function returns min height of node
 
             fixedAspectRatioResizeModeSelector: ".fixedAspectRatioResizeMode",// with only 4 active grapples (at corners)
-            noResizeModeSelector: ".noResizeMode", // no active grapples
+            noResizeModeSelector: ".noResizeMode, :parent", // no active grapples
 
             cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
                 // May take any "cursor" css property
@@ -157,7 +157,7 @@
                 var selectedEles;
                 var tmpActiveBgOpacity;
                 var eMouseDown = function () {
-                    nodes = cy.nodes(":selected").not(":parent");
+                    nodes = cy.nodes(":selected");
                     selectedEles = cy.$(":selected");
                     cy.trigger("resizestart", [t, nodes]);
                     tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
@@ -311,7 +311,7 @@
             };
 
             var restoreGrapples = function () {
-                cy.nodes(":selected").not(":parent").each(function (i, node) {
+                cy.nodes(":selected").each(function (i, node) {
                     drawGrapples(node);
                 });
             };
