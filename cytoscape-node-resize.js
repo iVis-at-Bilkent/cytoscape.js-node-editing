@@ -17,7 +17,7 @@
       minWidth: function (node) {
         var data = node.data("resizeMinWidth");
         return data ? data : 15;
-      }, // a function returns min with of node
+      }, // a function returns min width of node
       minHeight: function (node) {
         var data = node.data("resizeMinHeight");
         return data ? data : 15;

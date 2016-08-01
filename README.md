@@ -8,6 +8,48 @@ Provides grapples to resize nodes.
 ![Image of extension](img.png)
 
 
+## API
+
+Only consists of initilization & default options.
+
+```js
+            cy.nodeResize({
+                  padding: 20, // spacing between node and grapples/rectangle
+            
+                  grappleSize: 8, // size of square dots
+                  grappleColor: "green", // color of grapples
+                  inactiveGrappleStroke: "outside 1px blue",
+                  boundingRectangle: true, // enable/disable bounding rectangle
+                  boundingRectangleStroke: "1.5px red", // style bounding rectangle
+            
+                  minWidth: function (node) {
+                    var data = node.data("resizeMinWidth");
+                    return data ? data : 15;
+                  }, // a function returns min width of node
+                  minHeight: function (node) {
+                    var data = node.data("resizeMinHeight");
+                    return data ? data : 15;
+                  }, // a function returns min height of node
+            
+                  fixedAspectRatioResizeModeSelector: ".fixedAspectRatioResizeMode",// with only 4 active grapples (at corners)
+                  noResizeModeSelector: ".noResizeMode", // no active grapples
+            
+                  cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
+                    // May take any "cursor" css property
+                    default: "default", // to be set after resizing finished or mouseleave
+                    inactive: "not-allowed",
+                    nw: "nw-resize",
+                    n: "n-resize",
+                    ne: "ne-resize",
+                    e: "e-resize",
+                    se: "se-resize",
+                    s: "s-resize",
+                    sw: "sw-resize",
+                    w: "w-resize"
+                  }
+             });
+```
+
 
 ## Dependencies
 
@@ -35,48 +77,12 @@ nodeResize( cytoscape, jQuery, oCanvas ); // register extension
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-node-resize', "jquery", "oCanvas], function( cytoscape, nodeResize, jQuery, oCanvas ){
+require(['cytoscape', 'cytoscape-node-resize', "jquery", "oCanvas"], function( cytoscape, nodeResize, jQuery, oCanvas ){
   nodeResize( cytoscape, jQuery, oCanvas ); // register extension
 });
 ```
 
 Plain HTML/JS has the extension registered for you automatically, because no `require()` is needed.
-
-
-## API
-
-Only consists of initilization & default options.
-
-```js
-            cy.nodeResize({
-                  padding: 20, // spacing between node and grapples/rectangle
-            
-                  grappleSize: 8, // size of square dots
-                  grappleColor: "green", // color of grapples
-                  inactiveGrappleStroke: "outside 1px blue",
-                  boundingRectangle: true, // enable/disable bounding rectangle
-                  boundingRectangleStroke: "1.5px red", // style bounding rectangle
-            
-                  minNodeSize: 15, // minimum width/height of node to be set
-            
-                  fixedAspectRatioResizeModeSelector: ".fixedAspectRatioResizeMode",// with only 4 active grapples (at corners)
-                  noResizeModeSelector: ".noResizeMode", // no active grapples
-            
-                  cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
-                    // May take any "cursor" css property
-                    default: "default", // to be set after resizing finished or mouseleave
-                    inactive: "not-allowed",
-                    nw: "nw-resize",
-                    n: "n-resize",
-                    ne: "ne-resize",
-                    e: "e-resize",
-                    se: "se-resize",
-                    s: "s-resize",
-                    sw: "sw-resize",
-                    w: "w-resize"
-                  }
-             });
-```
 
 
 ## Emitted Events
