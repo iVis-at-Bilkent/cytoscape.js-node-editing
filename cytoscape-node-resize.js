@@ -9,7 +9,7 @@
         } // can't register if cytoscape unspecified
 
         var options = {
-            padding: 20, // spacing between node and grapples/rectangle
+            padding: 5, // spacing between node and grapples/rectangle
             undoable: true, // and if cy.undoRedo exists
 
             grappleSize: 8, // size of square dots
@@ -93,13 +93,17 @@
 
             };
 
+            var getGrappleSize = function () {
+                return Math.max(1, cy.zoom()) * options.grappleSize;
+            }
+
             var drawGrapple = function (x, y, t, n, cur) {
                 if (options.isNoResizeMode(n) || (options.isFixedAspectRatioResizeMode(n) && t.indexOf("center") >= 0)) {
                     var inactiveGrapple = canvas.display.rectangle({
                         x: x,
                         y: y,
-                        height: options.grappleSize,
-                        width: options.grappleSize,
+                        height: getGrappleSize(),
+                        width: getGrappleSize(),
                         stroke: options.inactiveGrappleStroke
                     });
 
@@ -145,8 +149,8 @@
                 var grapple = canvas.display.rectangle({
                     x: x,
                     y: y,
-                    height: options.grappleSize,
-                    width: options.grappleSize,
+                    height: getGrappleSize(),
+                    width: getGrappleSize(),
                     fill: options.grappleColor
                 });
 
@@ -278,8 +282,8 @@
 
             var drawGrapples = function (node) {
                 var nodePos = node.renderedPosition();
-                var width = node.renderedWidth() + options.padding;
-                var height = node.renderedHeight() + options.padding;
+                var width = node.renderedWidth() + options.padding*Math.max(1, cy.zoom());
+                var height = node.renderedHeight() + options.padding*Math.max(1, cy.zoom());
                 var startPos = {
                     x: nodePos.x - width / 2,
                     y: nodePos.y - height / 2
@@ -296,7 +300,7 @@
                     canvas.addChild(rect);
                 }
 
-                var gs = options.grappleSize;
+                var gs = getGrappleSize();
 
                 // Clock turning
                 drawGrapple(startPos.x - gs / 2, startPos.y - gs / 2, "topleft", node, options.cursors.nw);
