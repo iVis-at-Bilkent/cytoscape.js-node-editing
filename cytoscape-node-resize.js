@@ -162,7 +162,7 @@
           cy.panningEnabled(false);
           cy.autounselectify(true);
           cy.autoungrabify(true);
-          nodes = cy.nodes(":selected");
+          nodes = cy.nodes(":selected").not(":parent");
           selectedEles = cy.$(":selected");
           cy.trigger("resizestart", [t]);
           grapple.unbind("touchleave mouseleave", eMouseLeave);
@@ -237,9 +237,7 @@
                     continue;
               }
 
-              if (t.endsWith("left")) {
-                if (node.width() - xWidth > options.minWidth(node))
-                    continue;
+              if (t.endsWith("left") && node.width() - xWidth > options.minWidth(node)) {
                 node.position("x", nodePos.x + xWidth/2);
                 node.css("width", node.width() - xWidth);
               } else if (t.endsWith("right") && node.width() + xWidth > options.minWidth(node)) {
@@ -306,7 +304,7 @@
       };
 
       var restoreGrapples = function () {
-        cy.nodes(":selected").each(function (i, node) {
+        cy.nodes(":selected").not(":parent").each(function (i, node) {
           drawGrapples(node);
         });
       };
