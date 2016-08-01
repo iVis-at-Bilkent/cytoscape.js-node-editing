@@ -28,8 +28,8 @@
                 return data ? data : 15;
             }, // a function returns min height of node
 
-            fixedAspectRatioResizeModeSelector: ".fixedAspectRatioResizeMode",// with only 4 active grapples (at corners)
-            noResizeModeSelector: ".noResizeMode, :parent", // no active grapples
+            isFixedAspectRatioResizeMode: function (node) { return node.is(".fixedAspectRatioResizeMode") },// with only 4 active grapples (at corners)
+            isNoResizeMode: function (node) { return node.is(".noResizeMode, :parent") }, // no active grapples
 
             cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
                 // May take any "cursor" css property
@@ -94,7 +94,7 @@
             };
 
             var drawGrapple = function (x, y, t, n, cur) {
-                if (n.is(options.noResizeModeSelector) || (n.is(options.fixedAspectRatioResizeModeSelector) && t.indexOf("center") >= 0)) {
+                if (options.isNoResizeMode(n) || (options.isFixedAspectRatioResizeMode(n) && t.indexOf("center") >= 0)) {
                     var inactiveGrapple = canvas.display.rectangle({
                         x: x,
                         y: y,
@@ -209,9 +209,9 @@
                             var node = nodes[i];
 
 
-                            var isAspectedMode = node.is(options.fixedAspectRatioResizeModeSelector);
+                            var isAspectedMode = options.isFixedAspectRatioResizeMode(node);
                             if ((isAspectedMode && t.indexOf("center") >= 0) ||
-                                node.is(options.noResizeModeSelector))
+                                options.isNoResizeMode(node))
                                 continue;
 
                             if (isAspectedMode) {
