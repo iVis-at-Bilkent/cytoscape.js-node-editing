@@ -14,14 +14,16 @@ Only consists of initilization & default options.
 
 ```js
             cy.nodeResize({
-                padding: 20, // spacing between node and grapples/rectangle
+                padding: 5, // spacing between node and grapples/rectangle
                 undoable: true, // and if cy.undoRedo exists
     
                 grappleSize: 8, // size of square dots
                 grappleColor: "green", // color of grapples
-                inactiveGrappleStroke: "outside 1px blue",
+                inactiveGrappleStroke: "inside 1px blue",
                 boundingRectangle: true, // enable/disable bounding rectangle
-                boundingRectangleStroke: "1.5px red", // style bounding rectangle
+                boundingRectangleLineDash: [4, 8], // line dash of bounding rectangle
+                boundingRectangleLineColor: "red",
+                boundingRectangleLineWidth: 1.5,
                 zIndex: 999,
     
                 minWidth: function (node) {
@@ -33,8 +35,8 @@ Only consists of initilization & default options.
                     return data ? data : 15;
                 }, // a function returns min height of node
     
-                fixedAspectRatioResizeModeSelector: ".fixedAspectRatioResizeMode",// with only 4 active grapples (at corners)
-                noResizeModeSelector: ".noResizeMode", // no active grapples
+                isFixedAspectRatioResizeMode: function (node) { return node.is(".fixedAspectRatioResizeMode") },// with only 4 active grapples (at corners)
+                isNoResizeMode: function (node) { return node.is(".noResizeMode, :parent") }, // no active grapples
     
                 cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
                     // May take any "cursor" css property
