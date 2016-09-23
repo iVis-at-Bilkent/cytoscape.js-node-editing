@@ -601,13 +601,13 @@
             };
             var redraw = debounce(redrawNow, 15);
 
-            cy.on("unselect", "node", redrawNow);
+            cy.on("unselect", "node", redraw);
             cy.on("position", "node", redraw);
-            cy.on("zoom", redrawNow);
-            cy.on("pan", redrawNow);
+            cy.on("zoom", redraw);
+            cy.on("pan", redraw);
             cy.on("style", "node", redraw);
 
-            cy.on("select", "node", redrawNow);
+            cy.on("select", "node", redraw);
 
             if (cy.undoRedo && options.undoable) {
 
