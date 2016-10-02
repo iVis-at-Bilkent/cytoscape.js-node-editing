@@ -590,6 +590,9 @@
             };
 
             var restoreGrapples = function () {
+                if (cy.nodes(":selected").size() != 1)
+                    return;
+
                 cy.nodes(":selected").each(function (i, node) {
                     drawGrapples(node);
                 });
@@ -599,15 +602,53 @@
                 clearDrawing();
                 restoreGrapples();
             };
-            var redraw = debounce(redrawNow, 15);
 
-            cy.on("unselect", "node", redraw);
-            cy.on("position", "node", redraw);
-            cy.on("zoom", redraw);
-            cy.on("pan", redraw);
-            cy.on("style", "node", redraw);
+            var selectParticularNode = function(e) {
+                var node = this;
+                if (cy.nodes(":selected").size() != 1)
+                    redrawNow();
+                else
+                    drawGrapples(node);
 
-            cy.on("select", "node", redraw);
+            };
+
+            var unBindEvents = function() {
+                cy.off("unselect", "node", redraw);
+                cy.off("position", "node", redraw);
+                cy.off("zoom", redraw);
+                //cy.off("pan", redraw);
+                //cy.off("style", "node", redraw);
+                cy.off("select", "node", selectParticularNode);
+            };
+
+            var redraw = debounce(redrawNow, 150);
+            var bindEvents = function() {
+                cy.on("unselect", "node", redrawNow);
+                cy.on("position", "node", redrawNow);
+                cy.on("zoom", redrawNow);
+                cy.on("pan", redrawNow);
+                //cy.on("style", "node", redraw);
+                cy.on("select", "node", selectParticularNode);
+            };
+            bindEvents();
+
+            var clearOnDrag = function() {
+                clearDrawing();
+                cy.off("drag", clearOnDrag);
+            }
+
+            /*
+             cy.on("grab", function() {
+             unBindEvents();
+             clearDrawing();
+             cy.on("drag", clearOnDrag);
+             });
+
+             cy.on("free", "node", function() {
+             redrawNow();
+             bindEvents();
+
+             });*/
 
             if (cy.undoRedo && options.undoable) {
 
