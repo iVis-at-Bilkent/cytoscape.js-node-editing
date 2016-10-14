@@ -94,6 +94,8 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 `cy.on("resizeend", function(e, type, nodes){ })`
 
+`cy.on("resizedrag", function(e, type, nodes){ })`
+
 
 `type` param can be `topleft`, `topcenter`, `topright`, `centerright`, 
 `bottomright`, `bottomcenter`, `bottomleft`, `centerleft`
