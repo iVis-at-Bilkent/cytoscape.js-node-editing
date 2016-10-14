@@ -532,7 +532,8 @@
 
                     startPos.x = x;
                     startPos.y = y;
-
+                    
+                    cy.trigger("resizedrag", [t, nodes]);
                 };
 
                 var eMouseEnter = function () {
