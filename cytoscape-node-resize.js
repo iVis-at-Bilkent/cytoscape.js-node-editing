@@ -32,6 +32,7 @@
 
             isFixedAspectRatioResizeMode: function (node) { return node.is(".fixedAspectRatioResizeMode") },// with only 4 active grapples (at corners)
             isNoResizeMode: function (node) { return node.is(".noResizeMode, :parent") }, // no active grapples
+            isResizable: function (node) { return true) }, // is node resizable, if not then dont show grapples at all
 
             cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
                 // May take any "cursor" css property
@@ -554,6 +555,10 @@
             };
 
             var drawGrapples = function (node) {
+                if (options.isResizable && !options.isResizable(node)) {
+                    //if node is not candidate for resizble then dont draw resizble Grapples
+                  return;
+                }
                 var nodePos = node.renderedPosition();
                 var width = node.renderedOuterWidth() + getPadding();
                 var height = node.renderedOuterHeight() + getPadding();
