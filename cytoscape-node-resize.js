@@ -210,7 +210,7 @@
                 var startPos = {};
                 var tmpActiveBgOpacity;
                 var eMouseDown = function () {
-                    cy.trigger("resizestart", [t, node]);
+                    cy.trigger("noderesize.resizestart", [t, node]);
                     tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
                     cy.style()
                         .selector("core")
@@ -238,7 +238,7 @@
                     cy.panningEnabled(true);
                     cy.autounselectify(false);
                     cy.autoungrabify(false);
-                    cy.trigger("resizeend", [t, node]);
+                    cy.trigger("noderesize.resizeend", [t, node]);
                     setTimeout(function () {
                         cy.$().unselect();
                         node.select();
@@ -303,7 +303,7 @@
                     startPos.x = x;
                     startPos.y = y;
                     
-                    cy.trigger("resizedrag", [t, node]);
+                    cy.trigger("noderesize.resizedrag", [t, node]);
                 };
 
                 var eMouseEnter = function () {
@@ -456,7 +456,7 @@
 
                 var param;
 
-                cy.on("resizestart", function (e, type, node) {
+                cy.on("noderesize.resizestart", function (e, type, node) {
                     param = {
                         node: node,
                         css: {
@@ -467,7 +467,7 @@
                     };
                 });
                 
-                cy.on("resizeend", function (e, type, node) {
+                cy.on("noderesize.resizeend", function (e, type, node) {
                     param.firstTime = true;
                     cy.undoRedo().do("resize", param);
                     param = undefined;

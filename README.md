@@ -90,17 +90,17 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 
 ## Emitted Events
-`cy.on("resizestart", function(e, type, nodes){ })`
+`cy.on("noderesize.resizestart", function(e, type, node){ })`
 
-`cy.on("resizeend", function(e, type, nodes){ })`
+`cy.on("noderesize.resizeend", function(e, type, node){ })`
 
-`cy.on("resizedrag", function(e, type, nodes){ })`
+`cy.on("noderesize.resizedrag", function(e, type, node){ })`
 
 
 `type` param can be `topleft`, `topcenter`, `topright`, `centerright`, 
 `bottomright`, `bottomcenter`, `bottomleft`, `centerleft`
 
-`nodes` param corresponds to currently resizing nodes.
+`node` param corresponds to currently resizing node.
 
 ## Publishing instructions
 

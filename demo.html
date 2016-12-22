@@ -90,11 +90,11 @@
 
 				cy.nodeResize();
 
-				cy.on("resizestart", function (e, type) {
+				cy.on("noderesize.resizestart", function (e, type) {
 					console.log(type);
 				});
 
-				cy.on("resizeend", function (e, type) {
+				cy.on("noderesize.resizeend", function (e, type) {
 					document.body.style.cursor = 'initial';
 				});
 
