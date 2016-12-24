@@ -466,11 +466,15 @@
                 });
                 
                 cy.on("zoom", eZoom = function() {
-                    refreshGrapples();
+                    if ( nodeToDrawGrapples ) {
+                      refreshGrapples();
+                    }
                 });
                 
                 cy.on("pan", ePan = function() {
+                  if ( nodeToDrawGrapples ) {
                     refreshGrapples();
+                  }
                 });
                 //cy.on("style", "node", redraw);
             };
