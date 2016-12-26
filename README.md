@@ -57,7 +57,8 @@ Only consists of initilization & default options.
 ## Dependencies
 
  * Cytoscape.js ^2.7.0
- * oCanvas ^2.8.0
+ * jquery ^1.7.0 || ^2.0.0 || ^3.0.0
+ * oCanvas ^2.8.0 // It is not commonjs nor AMD compatible just include it in your html file
  * cytoscape-undo-redo ^1.0.10 (optional)
 
 
@@ -74,15 +75,14 @@ CommonJS:
 ```js
 var cytoscape = require('cytoscape');
 var nodeResize = require('cytoscape-node-resize');
-var oCanvas = require('oCanvas');
 
-nodeResize( cytoscape, jQuery, oCanvas ); // register extension
+nodeResize( cytoscape, jQuery ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-node-resize', "jquery", "oCanvas"], function( cytoscape, nodeResize, jQuery, oCanvas ){
-  nodeResize( cytoscape, jQuery, oCanvas ); // register extension
+require(['cytoscape', 'cytoscape-node-resize', "jquery"], function( cytoscape, nodeResize, jQuery ){
+  nodeResize( cytoscape, jQuery ); // register extension
 });
 ```
 
