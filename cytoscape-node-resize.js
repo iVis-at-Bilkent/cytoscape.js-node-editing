@@ -2,11 +2,14 @@
     'use strict';
     
     // registers the extension on a cytoscape lib ref
-    var register = function (cytoscape, $, oCanvas) {
+    var register = function (cytoscape, $) {
 
+        // can't register if required libraries does not exist 
+        // note that oCanvas is not parametrezid here because it is not commonjs nor amd compatible
+        // it is expected to be defined as a browser global
         if (!cytoscape || !$ || !oCanvas) {
             return;
-        } // can't register if cytoscape unspecified
+        } 
 
         var options = {
             padding: 5, // spacing between node and grapples/rectangle
@@ -546,8 +549,8 @@
         });
     }
 
-    if (typeof cytoscape !== 'undefined' && typeof jQuery !== "undefined" && typeof oCanvas !== "undefined") { // expose to global cytoscape (i.e. window.cytoscape)
-        register(cytoscape, jQuery, oCanvas);
+    if (typeof cytoscape !== 'undefined' && typeof jQuery !== "undefined") { // expose to global cytoscape (i.e. window.cytoscape)
+        register(cytoscape, jQuery);
     }
 
 })();
