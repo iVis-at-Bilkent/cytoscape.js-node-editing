@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-node-resize",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "",
   "main": "cytoscape-node-resize.js",
   "spm": {
