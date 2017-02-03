@@ -463,7 +463,8 @@
                 
                 cy.on("position", "node", ePositionNode = function() {
                     var node = this;
-                    if (nodeToDrawGrapples && nodeToDrawGrapples.id() === node.id()) {
+                    if (nodeToDrawGrapples && (nodeToDrawGrapples.id() === node.id() ||
+                        (node.ancestors(":selected").id() == nodeToDrawGrapples.id()) ) ) {
                         refreshGrapples();
                     }
                 });
