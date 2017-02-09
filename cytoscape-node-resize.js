@@ -59,7 +59,7 @@
             // Calculating it each time decreases performance.
             var numberOfSelectedNodes;
             // Events to bind and unbind
-            var eUnselectNode, ePositionNode, eZoom, ePan, eSelectNode, eRemoveNode, eAddNode;
+            var eUnselectNode, ePositionNode, eZoom, ePan, eSelectNode, eRemoveNode, eAddNode, eFreeNode;
             
             // Initilize nodes to draw grapples and the number of selected nodes
             {
@@ -400,6 +400,7 @@
             var unBindEvents = function() {
                 cy.off("unselect", "node", eUnselectNode);
                 cy.off("position", "node", ePositionNode);
+                cy.off("position", "node", eFreeNode);
                 cy.off("zoom", eZoom);
                 cy.off("pan", ePan);
                 //cy.off("style", "node", redraw);
@@ -463,10 +464,22 @@
                 
                 cy.on("position", "node", ePositionNode = function() {
                     var node = this;
-                    if (nodeToDrawGrapples && (nodeToDrawGrapples.id() === node.id() ||
-                        (node.ancestors(":selected").id() == nodeToDrawGrapples.id()) ) ) {
+                    if ( nodeToDrawGrapples && nodeToDrawGrapples.id() === node.id() ) {
                         refreshGrapples();
                     }
+                });
+                
+                /*
+                 * Interestingly when a node is positioned programatically 'position' event is triggered for its ancestors as well if their position changed.
+                 * However it is not triggered for them when the node is freed. Therefore we need to handle "free" case and check if the nodeToGrapples
+                 * is an anchestor of the freed node.
+                 */
+                cy.on("free", "node", eFreeNode =function() {
+                  var node = this;
+                  
+                  if( nodeToDrawGrapples && nodeToDrawGrapples.id() !== node.id() && node.ancestors(":selected").id() == nodeToDrawGrapples.id() ) {
+                    refreshGrapples();
+                  }
                 });
                 
                 cy.on("zoom", eZoom = function() {
