@@ -79,9 +79,7 @@
             var $container = $(cy.container());
             $container.append($canvas);
 
-            // Note that this function is expected to be called with debounce. However, in that case oCanvas library does not
-            // work as expected (the events are not listened correctly etc.). Therefore, we do not use debounce function here
-            // for now.
+            // Resize the canvas
             var _sizeCanvas = function () {
                 $canvas
                   .attr('height', $container.height())
