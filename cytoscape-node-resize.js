@@ -10,6 +10,8 @@
         if (!cytoscape || !$ || !oCanvas) {
             return;
         } 
+        
+        var canvas;
 
         var options = {
             padding: 5, // spacing between node and grapples/rectangle
@@ -102,6 +104,15 @@
                       'left': -(canvasBb.left - containerBb.left)
                     })
                   ;
+                  
+                  // If there is a previously created canvas destroy it and reset the canvas
+                  if (canvas) {
+                    canvas.destroy();
+                  }
+                  // See if old canvas is destroyed
+                  canvas = oCanvas.create({
+                    canvas: "#node-resize"
+                  });
 
                   // redraw on canvas resize
                   if(cy){
@@ -112,7 +123,7 @@
               };
 
               function sizeCanvas() {
-                _sizeCanvas();
+                setTimeout(_sizeCanvas, 250);
               }
 
               sizeCanvas();
@@ -148,10 +159,6 @@
                         canvas.closePath();
                     }
                 }, settings);
-            });
-
-            var canvas = oCanvas.create({
-                canvas: "#node-resize"
             });
 
             var clearDrawing = function () {
