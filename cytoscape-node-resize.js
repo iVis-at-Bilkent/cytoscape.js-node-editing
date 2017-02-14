@@ -633,6 +633,120 @@
                     drawGrapples(nodeToDrawGrapples);
                 }
             };
+            
+            function getTopMostNodes(nodes) {
+				var nodesMap = {};
+				for (var i = 0; i < nodes.length; i++) {
+					nodesMap[nodes[i].id()] = true;
+				}
+				var roots = nodes.filter(function (i, ele) {
+					var parent = ele.parent()[0];
+					while(parent != null){
+						if(nodesMap[parent.id()]){
+							return false;
+						}
+						parent = parent.parent()[0];
+					}
+					return true;
+				});
+
+				return roots;
+			}
+			
+			function moveNodes(positionDiff, nodes, notCalcTopMostNodes) {
+				var topMostNodes = notCalcTopMostNodes?nodes:getTopMostNodes(nodes);
+				for (var i = 0; i < topMostNodes.length; i++) {
+					var node = topMostNodes[i];
+					var oldX = node.position("x");
+					var oldY = node.position("y");
+					node.position({
+						x: oldX + positionDiff.x,
+						y: oldY + positionDiff.y
+					});
+					var children = node.children();
+					moveNodes(positionDiff, children, true);
+				}
+			}
+			
+			var selectedNodesToMove;
+			//var selectedNodesPosition;
+			var nodesMoving = false;
+
+			function keyDown(e) {
+				//e = e || window.event;
+				if (e.keyCode < '37' || e.keyCode > '40') {
+					return;
+				}
+				
+				if (!nodesMoving)
+				{
+					selectedNodesToMove = cy.nodes(':selected');
+					cy.trigger("noderesize.movestart", [selectedNodesToMove]);			
+					nodesMoving = true;
+				}				
+				if (e.ctrlKey && e.which == '38') {
+					// up arrow and ctrl
+					moveNodes ({x:0, y:-1},selectedNodesToMove);		
+				}
+				else if (e.ctrlKey && e.which == '40') {
+					// down arrow and ctrl
+					moveNodes ({x:0, y:1},selectedNodesToMove);		
+				}
+				else if (e.ctrlKey && e.which == '37') {
+					// left arrow and ctrl
+					moveNodes ({x:-1, y:0},selectedNodesToMove);				   
+				}
+				else if (e.ctrlKey && e.which == '39') {
+					// right arrow and ctrl
+					moveNodes ({x:1, y:0},selectedNodesToMove);		     
+				}
+				
+				else if (e.shiftKey && e.which == '38') {
+					// up arrow and shift
+					moveNodes ({x:0, y:-10},selectedNodesToMove);		
+				}
+				else if (e.shiftKey && e.which == '40') {
+					// down arrow and shift
+					moveNodes ({x:0, y:10},selectedNodesToMove);	
+				}
+				else if (e.shiftKey && e.which == '37') {
+					// left arrow and shift
+					moveNodes ({x:-10, y:0},selectedNodesToMove);		
+				   
+				}
+				else if (e.shiftKey && e.which == '39' ) {
+					// right arrow and shift
+					moveNodes ({x:10, y:0},selectedNodesToMove);		     
+				}
+				
+				else if (e.keyCode == '38') {
+					// up arrow
+					moveNodes ({x:0, y:-3},selectedNodesToMove);	
+				}
+				else if (e.keyCode == '40') {
+					// down arrow
+					moveNodes ({x:0, y:3},selectedNodesToMove);
+				}
+				else if (e.keyCode == '37') {
+					// left arrow
+					moveNodes ({x:-3, y:0},selectedNodesToMove);
+				}
+				else if (e.keyCode == '39') {
+					//right arrow
+					moveNodes ({x:3, y:0},selectedNodesToMove);
+				}
+			}
+			
+			function keyUp(e) {
+                if (e.keyCode < '37' || e.keyCode > '40') {
+                    return;
+                }
+                //undo redo part goes here		
+                cy.trigger("noderesize.moveend", [selectedNodesToMove]);
+                selectedNodesToMove = undefined;
+                //selectedNodesPosition = undefined;
+                nodesMoving = false;				
+            }
 
             var unBindEvents = function() {
                 cy.off("unselect", "node", eUnselectNode);
@@ -730,13 +844,16 @@
                     refreshGrapples();
                   }
                 });
-                //cy.on("style", "node", redraw);
+                
+                document.addEventListener("keydown",keyDown, true);
+				document.addEventListener("keyup",keyUp, true);
             };
             bindEvents();
 
             if (cy.undoRedo && options.undoable) {
 
                 var param;
+                var moveparam;
 
                 cy.on("noderesize.resizestart", function (e, type, node) {
                     param = {
@@ -754,6 +871,32 @@
                     cy.undoRedo().do("resize", param);
                     param = undefined;
                 });
+                
+                cy.on("noderesize.movestart", function (e, nodes) {
+					
+					moveparam = {
+						firstTime : true,
+						firstNodePosition: {
+							x: nodes[0].position('x'),
+							y: nodes[0].position('y')
+						},
+						nodes: nodes
+					}										
+                });
+				
+				cy.on("noderesize.moveend", function (e, nodes) {
+					var initialPos = moveparam.firstNodePosition;
+					
+					moveparam.positionDiff = {
+						x: -nodes[0].position('x') + initialPos.x,
+						y: -nodes[0].position('y') + initialPos.y
+					}
+					
+					delete moveparam.firstNodePosition;
+					
+                    cy.undoRedo().do("noderesize.move", moveparam);
+                    moveparam = undefined;
+                });	
 
                 var resizeDo = function (arg) {
                     if (arg.firstTime) {
@@ -780,8 +923,33 @@
                     
                     return result;
                 };
+                
+                var moveDo = function (arg) {
+                    if (arg.firstTime) {
+                        delete arg.firstTime;
+                        return arg;
+                    }
+						
+                    var nodes = arg.nodes;
+					
+					var positionDiff = arg.positionDiff;
+					
+                    var result = {
+                        nodes: nodes,
+                        positionDiff: {
+							x: -positionDiff.x,
+							y: -positionDiff.y
+						}
+                    };
+					
+					
+					moveNodes (positionDiff,nodes);  
+			        
+                    return result;
+                };
 
                 cy.undoRedo().action("resize", resizeDo, resizeDo);
+                cy.undoRedo().action("noderesize.move", moveDo, moveDo);
             }
 
 

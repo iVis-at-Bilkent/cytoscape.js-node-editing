@@ -1,0 +1,125 @@
+<!DOCTYPE>
+
+<html>
+
+	<head>
+		<title>cytoscape-node-resize.js demo</title>
+
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+
+		<script src="https://code.jquery.com/jquery-3.1.0.slim.min.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/ocanvas/2.8.4/ocanvas.min.js"></script>
+		<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+		<script src="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-undo-redo/master/cytoscape-undo-redo.js"></script>
+
+		<!-- for testing with local version of cytoscape.js -->
+		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+
+		<script src="cytoscape-node-resize.js"></script>
+
+		<style>
+			body {
+				font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+				font-size: 14px;
+			}
+
+			#cy {
+				position: absolute;
+				left: 0;
+				top: 0;
+				bottom: 0;
+				right: 0;
+				z-index: 999;
+			}
+
+			h1 {
+				opacity: 0.5;
+				font-size: 1em;
+				font-weight: bold;
+			}
+		</style>
+
+		<script>
+			document.addEventListener('DOMContentLoaded', function(){
+
+				var cy = window.cy = cytoscape({
+					container: document.getElementById('cy'),
+
+					style: [
+						{
+							selector: 'node',
+							style: {
+								'content': 'data(name)'
+							}
+						},
+
+						{
+							selector: 'edge',
+							style: {
+								'target-arrow-shape': 'triangle'
+							}
+						},
+
+						{
+							selector: ':selected',
+							style: {
+
+							}
+						}
+					],
+
+					elements: {
+						nodes: [
+							{ data: { id: 'j', name: 'Aspected Resize' }, classes: "fixedAspectRatioResizeMode" },
+							{ data: { id: 'e', name: 'Full Resize', parent: 'c'} },
+							{ data: { id: 'g', name: 'Multi Node Resize (Full)' } },
+							{ data: { id: 'k', name: 'No Resize' }, classes: "noResizeMode" },
+							{ data: { id: 'c', name: 'Full Resize' } }
+						],
+						edges: [
+							{ data: { source: 'j', target: 'e' } },
+							{ data: { source: 'j', target: 'k' } },
+							{ data: { source: 'j', target: 'g' } },
+							{ data: { source: 'e', target: 'j' } },
+							{ data: { source: 'e', target: 'k' } },
+							{ data: { source: 'k', target: 'j' } },
+							{ data: { source: 'k', target: 'e' } },
+							{ data: { source: 'k', target: 'g' } },
+							{ data: { source: 'g', target: 'j' } }
+						]
+					}
+				});
+
+				cy.nodeResize({
+					undoable: true,
+				  });
+
+				cy.on("noderesize.resizestart", function (e, type) {
+					console.log(type);
+				});
+
+				cy.on("noderesize.resizeend", function (e, type) {
+					document.body.style.cursor = 'initial';
+				});
+				document.addEventListener('keydown', function (e){
+					if (e.ctrlKey && e.which == '90') {
+						cy.undoRedo().undo();	     
+					}
+					else if (e.ctrlKey && e.which == '89') {
+						cy.undoRedo().redo();     
+					}
+				}, true );
+				
+				
+			});
+		</script>
+	</head>
+
+	<body>
+		<h1>cytoscape-node-resize demo</h1>
+
+		<div id="cy"></div>
+
+	</body>
+
+</html>
