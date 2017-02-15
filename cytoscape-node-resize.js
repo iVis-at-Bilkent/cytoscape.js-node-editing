@@ -671,8 +671,20 @@
 			var selectedNodesToMove;
 			//var selectedNodesPosition;
 			var nodesMoving = false;
-
+			
+			var keys = {};
 			function keyDown(e) {
+
+
+				keys[e.keyCode] = true;
+				switch(e.keyCode){
+				    case 37: case 39: case 38:  case 40: // Arrow keys
+				    case 32: e.preventDefault(); break; // Space
+				    default: break; // do not block other keys
+				}
+
+
+
 				//e = e || window.event;
 				if (e.keyCode < '37' || e.keyCode > '40') {
 					return;
@@ -845,8 +857,19 @@
                   }
                 });
                 
+		/*var keys = {};
+		window.addEventListener("keydown",
+		    function(e){
+			keys[e.keyCode] = true;
+			switch(e.keyCode){
+			    case 37: case 39: case 38:  case 40: // Arrow keys
+			    case 32: e.preventDefault(); break; // Space
+			    default: break; // do not block other keys
+			}
+		    },
+		false);*/
                 document.addEventListener("keydown",keyDown, true);
-				document.addEventListener("keyup",keyUp, true);
+		document.addEventListener("keyup",keyUp, true);
             };
             bindEvents();
 
