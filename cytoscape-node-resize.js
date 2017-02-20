@@ -653,19 +653,19 @@
 				return roots;
 			}
 			
-			function moveNodes(positionDiff, nodes, notCalcTopMostNodes) {
-				var topMostNodes = notCalcTopMostNodes?nodes:getTopMostNodes(nodes);
-				for (var i = 0; i < topMostNodes.length; i++) {
-					var node = topMostNodes[i];
-					var oldX = node.position("x");
-					var oldY = node.position("y");
-					node.position({
-						x: oldX + positionDiff.x,
-						y: oldY + positionDiff.y
-					});
-					var children = node.children();
-					moveNodes(positionDiff, children, true);
-				}
+			function moveNodes(positionDiff, nodes) {
+                // Get the descendants of top most nodes. Note that node.position() can move just the simple nodes.
+                var topMostNodes = getTopMostNodes(nodes);
+                var nodesToMove = topMostNodes.union(topMostNodes.descendants());
+                
+				nodesToMove.positions(function(i, node) {
+                  var oldX = node.position("x");
+                  var oldY = node.position("y");
+                  return {
+                    x: oldX + positionDiff.x,
+                    y: oldY + positionDiff.y
+                  };
+                });
 			}
 			
 			var selectedNodesToMove;
