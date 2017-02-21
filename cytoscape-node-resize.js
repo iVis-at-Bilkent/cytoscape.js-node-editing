@@ -696,20 +696,20 @@
 					cy.trigger("noderesize.movestart", [selectedNodesToMove]);			
 					nodesMoving = true;
 				}				
-				if (e.ctrlKey && e.which == '38') {
-					// up arrow and ctrl
+				if (e.altKey && e.which == '38') {
+					// up arrow and alt
 					moveNodes ({x:0, y:-1},selectedNodesToMove);		
 				}
-				else if (e.ctrlKey && e.which == '40') {
-					// down arrow and ctrl
+				else if (e.altKey && e.which == '40') {
+					// down arrow and alt
 					moveNodes ({x:0, y:1},selectedNodesToMove);		
 				}
-				else if (e.ctrlKey && e.which == '37') {
-					// left arrow and ctrl
+				else if (e.altKey && e.which == '37') {
+					// left arrow and alt
 					moveNodes ({x:-1, y:0},selectedNodesToMove);				   
 				}
-				else if (e.ctrlKey && e.which == '39') {
-					// right arrow and ctrl
+				else if (e.altKey && e.which == '39') {
+					// right arrow and alt
 					moveNodes ({x:1, y:0},selectedNodesToMove);		     
 				}
 				
