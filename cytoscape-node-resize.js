@@ -1,252 +1,252 @@
 ;(function () {
     'use strict';
-    
+
     var debounce = (function(){
-      /**
-       * lodash 3.1.1 (Custom Build) <https://lodash.com/>
-       * Build: `lodash modern modularize exports="npm" -o ./`
-       * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
-       * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
-       * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-       * Available under MIT license <https://lodash.com/license>
-       */
-      /** Used as the `TypeError` message for "Functions" methods. */
-      var FUNC_ERROR_TEXT = 'Expected a function';
+        /**
+         * lodash 3.1.1 (Custom Build) <https://lodash.com/>
+         * Build: `lodash modern modularize exports="npm" -o ./`
+         * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+         * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+         * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+         * Available under MIT license <https://lodash.com/license>
+         */
+        /** Used as the `TypeError` message for "Functions" methods. */
+        var FUNC_ERROR_TEXT = 'Expected a function';
 
-      /* Native method references for those with the same name as other `lodash` methods. */
-      var nativeMax = Math.max,
-          nativeNow = Date.now;
+        /* Native method references for those with the same name as other `lodash` methods. */
+        var nativeMax = Math.max,
+            nativeNow = Date.now;
 
-      /**
-       * Gets the number of milliseconds that have elapsed since the Unix epoch
-       * (1 January 1970 00:00:00 UTC).
-       *
-       * @static
-       * @memberOf _
-       * @category Date
-       * @example
-       *
-       * _.defer(function(stamp) {
+        /**
+         * Gets the number of milliseconds that have elapsed since the Unix epoch
+         * (1 January 1970 00:00:00 UTC).
+         *
+         * @static
+         * @memberOf _
+         * @category Date
+         * @example
+         *
+         * _.defer(function(stamp) {
        *   console.log(_.now() - stamp);
        * }, _.now());
-       * // => logs the number of milliseconds it took for the deferred function to be invoked
-       */
-      var now = nativeNow || function() {
-        return new Date().getTime();
-      };
+         * // => logs the number of milliseconds it took for the deferred function to be invoked
+         */
+        var now = nativeNow || function() {
+                return new Date().getTime();
+            };
 
-      /**
-       * Creates a debounced function that delays invoking `func` until after `wait`
-       * milliseconds have elapsed since the last time the debounced function was
-       * invoked. The debounced function comes with a `cancel` method to cancel
-       * delayed invocations. Provide an options object to indicate that `func`
-       * should be invoked on the leading and/or trailing edge of the `wait` timeout.
-       * Subsequent calls to the debounced function return the result of the last
-       * `func` invocation.
-       *
-       * **Note:** If `leading` and `trailing` options are `true`, `func` is invoked
-       * on the trailing edge of the timeout only if the the debounced function is
-       * invoked more than once during the `wait` timeout.
-       *
-       * See [David Corbacho's article](http://drupalmotion.com/article/debounce-and-throttle-visual-explanation)
-       * for details over the differences between `_.debounce` and `_.throttle`.
-       *
-       * @static
-       * @memberOf _
-       * @category Function
-       * @param {Function} func The function to debounce.
-       * @param {number} [wait=0] The number of milliseconds to delay.
-       * @param {Object} [options] The options object.
-       * @param {boolean} [options.leading=false] Specify invoking on the leading
-       *  edge of the timeout.
-       * @param {number} [options.maxWait] The maximum time `func` is allowed to be
-       *  delayed before it's invoked.
-       * @param {boolean} [options.trailing=true] Specify invoking on the trailing
-       *  edge of the timeout.
-       * @returns {Function} Returns the new debounced function.
-       * @example
-       *
-       * // avoid costly calculations while the window size is in flux
-       * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
-       *
-       * // invoke `sendMail` when the click event is fired, debouncing subsequent calls
-       * jQuery('#postbox').on('click', _.debounce(sendMail, 300, {
+        /**
+         * Creates a debounced function that delays invoking `func` until after `wait`
+         * milliseconds have elapsed since the last time the debounced function was
+         * invoked. The debounced function comes with a `cancel` method to cancel
+         * delayed invocations. Provide an options object to indicate that `func`
+         * should be invoked on the leading and/or trailing edge of the `wait` timeout.
+         * Subsequent calls to the debounced function return the result of the last
+         * `func` invocation.
+         *
+         * **Note:** If `leading` and `trailing` options are `true`, `func` is invoked
+         * on the trailing edge of the timeout only if the the debounced function is
+         * invoked more than once during the `wait` timeout.
+         *
+         * See [David Corbacho's article](http://drupalmotion.com/article/debounce-and-throttle-visual-explanation)
+         * for details over the differences between `_.debounce` and `_.throttle`.
+         *
+         * @static
+         * @memberOf _
+         * @category Function
+         * @param {Function} func The function to debounce.
+         * @param {number} [wait=0] The number of milliseconds to delay.
+         * @param {Object} [options] The options object.
+         * @param {boolean} [options.leading=false] Specify invoking on the leading
+         *  edge of the timeout.
+         * @param {number} [options.maxWait] The maximum time `func` is allowed to be
+         *  delayed before it's invoked.
+         * @param {boolean} [options.trailing=true] Specify invoking on the trailing
+         *  edge of the timeout.
+         * @returns {Function} Returns the new debounced function.
+         * @example
+         *
+         * // avoid costly calculations while the window size is in flux
+         * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+         *
+         * // invoke `sendMail` when the click event is fired, debouncing subsequent calls
+         * jQuery('#postbox').on('click', _.debounce(sendMail, 300, {
        *   'leading': true,
        *   'trailing': false
        * }));
-       *
-       * // ensure `batchLog` is invoked once after 1 second of debounced calls
-       * var source = new EventSource('/stream');
-       * jQuery(source).on('message', _.debounce(batchLog, 250, {
+         *
+         * // ensure `batchLog` is invoked once after 1 second of debounced calls
+         * var source = new EventSource('/stream');
+         * jQuery(source).on('message', _.debounce(batchLog, 250, {
        *   'maxWait': 1000
        * }));
-       *
-       * // cancel a debounced call
-       * var todoChanges = _.debounce(batchLog, 1000);
-       * Object.observe(models.todo, todoChanges);
-       *
-       * Object.observe(models, function(changes) {
+         *
+         * // cancel a debounced call
+         * var todoChanges = _.debounce(batchLog, 1000);
+         * Object.observe(models.todo, todoChanges);
+         *
+         * Object.observe(models, function(changes) {
        *   if (_.find(changes, { 'user': 'todo', 'type': 'delete'})) {
        *     todoChanges.cancel();
        *   }
        * }, ['delete']);
-       *
-       * // ...at some point `models.todo` is changed
-       * models.todo.completed = true;
-       *
-       * // ...before 1 second has passed `models.todo` is deleted
-       * // which cancels the debounced `todoChanges` call
-       * delete models.todo;
-       */
-      function debounce(func, wait, options) {
-        var args,
-            maxTimeoutId,
-            result,
-            stamp,
-            thisArg,
-            timeoutId,
-            trailingCall,
-            lastCalled = 0,
-            maxWait = false,
-            trailing = true;
+         *
+         * // ...at some point `models.todo` is changed
+         * models.todo.completed = true;
+         *
+         * // ...before 1 second has passed `models.todo` is deleted
+         * // which cancels the debounced `todoChanges` call
+         * delete models.todo;
+         */
+        function debounce(func, wait, options) {
+            var args,
+                maxTimeoutId,
+                result,
+                stamp,
+                thisArg,
+                timeoutId,
+                trailingCall,
+                lastCalled = 0,
+                maxWait = false,
+                trailing = true;
 
-        if (typeof func != 'function') {
-          throw new TypeError(FUNC_ERROR_TEXT);
-        }
-        wait = wait < 0 ? 0 : (+wait || 0);
-        if (options === true) {
-          var leading = true;
-          trailing = false;
-        } else if (isObject(options)) {
-          leading = !!options.leading;
-          maxWait = 'maxWait' in options && nativeMax(+options.maxWait || 0, wait);
-          trailing = 'trailing' in options ? !!options.trailing : trailing;
-        }
-
-        function cancel() {
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
-          if (maxTimeoutId) {
-            clearTimeout(maxTimeoutId);
-          }
-          lastCalled = 0;
-          maxTimeoutId = timeoutId = trailingCall = undefined;
-        }
-
-        function complete(isCalled, id) {
-          if (id) {
-            clearTimeout(id);
-          }
-          maxTimeoutId = timeoutId = trailingCall = undefined;
-          if (isCalled) {
-            lastCalled = now();
-            result = func.apply(thisArg, args);
-            if (!timeoutId && !maxTimeoutId) {
-              args = thisArg = undefined;
+            if (typeof func != 'function') {
+                throw new TypeError(FUNC_ERROR_TEXT);
             }
-          }
-        }
-
-        function delayed() {
-          var remaining = wait - (now() - stamp);
-          if (remaining <= 0 || remaining > wait) {
-            complete(trailingCall, maxTimeoutId);
-          } else {
-            timeoutId = setTimeout(delayed, remaining);
-          }
-        }
-
-        function maxDelayed() {
-          complete(trailing, timeoutId);
-        }
-
-        function debounced() {
-          args = arguments;
-          stamp = now();
-          thisArg = this;
-          trailingCall = trailing && (timeoutId || !leading);
-
-          if (maxWait === false) {
-            var leadingCall = leading && !timeoutId;
-          } else {
-            if (!maxTimeoutId && !leading) {
-              lastCalled = stamp;
+            wait = wait < 0 ? 0 : (+wait || 0);
+            if (options === true) {
+                var leading = true;
+                trailing = false;
+            } else if (isObject(options)) {
+                leading = !!options.leading;
+                maxWait = 'maxWait' in options && nativeMax(+options.maxWait || 0, wait);
+                trailing = 'trailing' in options ? !!options.trailing : trailing;
             }
-            var remaining = maxWait - (stamp - lastCalled),
-                isCalled = remaining <= 0 || remaining > maxWait;
 
-            if (isCalled) {
-              if (maxTimeoutId) {
-                maxTimeoutId = clearTimeout(maxTimeoutId);
-              }
-              lastCalled = stamp;
-              result = func.apply(thisArg, args);
+            function cancel() {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+                if (maxTimeoutId) {
+                    clearTimeout(maxTimeoutId);
+                }
+                lastCalled = 0;
+                maxTimeoutId = timeoutId = trailingCall = undefined;
             }
-            else if (!maxTimeoutId) {
-              maxTimeoutId = setTimeout(maxDelayed, remaining);
+
+            function complete(isCalled, id) {
+                if (id) {
+                    clearTimeout(id);
+                }
+                maxTimeoutId = timeoutId = trailingCall = undefined;
+                if (isCalled) {
+                    lastCalled = now();
+                    result = func.apply(thisArg, args);
+                    if (!timeoutId && !maxTimeoutId) {
+                        args = thisArg = undefined;
+                    }
+                }
             }
-          }
-          if (isCalled && timeoutId) {
-            timeoutId = clearTimeout(timeoutId);
-          }
-          else if (!timeoutId && wait !== maxWait) {
-            timeoutId = setTimeout(delayed, wait);
-          }
-          if (leadingCall) {
-            isCalled = true;
-            result = func.apply(thisArg, args);
-          }
-          if (isCalled && !timeoutId && !maxTimeoutId) {
-            args = thisArg = undefined;
-          }
-          return result;
+
+            function delayed() {
+                var remaining = wait - (now() - stamp);
+                if (remaining <= 0 || remaining > wait) {
+                    complete(trailingCall, maxTimeoutId);
+                } else {
+                    timeoutId = setTimeout(delayed, remaining);
+                }
+            }
+
+            function maxDelayed() {
+                complete(trailing, timeoutId);
+            }
+
+            function debounced() {
+                args = arguments;
+                stamp = now();
+                thisArg = this;
+                trailingCall = trailing && (timeoutId || !leading);
+
+                if (maxWait === false) {
+                    var leadingCall = leading && !timeoutId;
+                } else {
+                    if (!maxTimeoutId && !leading) {
+                        lastCalled = stamp;
+                    }
+                    var remaining = maxWait - (stamp - lastCalled),
+                        isCalled = remaining <= 0 || remaining > maxWait;
+
+                    if (isCalled) {
+                        if (maxTimeoutId) {
+                            maxTimeoutId = clearTimeout(maxTimeoutId);
+                        }
+                        lastCalled = stamp;
+                        result = func.apply(thisArg, args);
+                    }
+                    else if (!maxTimeoutId) {
+                        maxTimeoutId = setTimeout(maxDelayed, remaining);
+                    }
+                }
+                if (isCalled && timeoutId) {
+                    timeoutId = clearTimeout(timeoutId);
+                }
+                else if (!timeoutId && wait !== maxWait) {
+                    timeoutId = setTimeout(delayed, wait);
+                }
+                if (leadingCall) {
+                    isCalled = true;
+                    result = func.apply(thisArg, args);
+                }
+                if (isCalled && !timeoutId && !maxTimeoutId) {
+                    args = thisArg = undefined;
+                }
+                return result;
+            }
+            debounced.cancel = cancel;
+            return debounced;
         }
-        debounced.cancel = cancel;
-        return debounced;
-      }
 
-      /**
-       * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
-       * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
-       *
-       * @static
-       * @memberOf _
-       * @category Lang
-       * @param {*} value The value to check.
-       * @returns {boolean} Returns `true` if `value` is an object, else `false`.
-       * @example
-       *
-       * _.isObject({});
-       * // => true
-       *
-       * _.isObject([1, 2, 3]);
-       * // => true
-       *
-       * _.isObject(1);
-       * // => false
-       */
-      function isObject(value) {
-        // Avoid a V8 JIT bug in Chrome 19-20.
-        // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-        var type = typeof value;
-        return !!value && (type == 'object' || type == 'function');
-      }
+        /**
+         * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+         * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+         *
+         * @static
+         * @memberOf _
+         * @category Lang
+         * @param {*} value The value to check.
+         * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+         * @example
+         *
+         * _.isObject({});
+         * // => true
+         *
+         * _.isObject([1, 2, 3]);
+         * // => true
+         *
+         * _.isObject(1);
+         * // => false
+         */
+        function isObject(value) {
+            // Avoid a V8 JIT bug in Chrome 19-20.
+            // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+            var type = typeof value;
+            return !!value && (type == 'object' || type == 'function');
+        }
 
-      return debounce;
+        return debounce;
 
     })();
-    
+
     // registers the extension on a cytoscape lib ref
     var register = function (cytoscape, $) {
 
-        // can't register if required libraries does not exist 
+        // can't register if required libraries does not exist
         // note that oCanvas is not parametrezid here because it is not commonjs nor amd compatible
         // it is expected to be defined as a browser global
         if (!cytoscape || !$ || !oCanvas) {
             return;
-        } 
-        
+        }
+
         var canvas;
 
         var options = {
@@ -292,21 +292,21 @@
         cytoscape('core', 'nodeResize', function (opts) {
             var cy = this;
             // Nodes to draw grapples this variable is set if there is just one selected node
-            var nodeToDrawGrapples; 
-            // We need to keep the number of selected nodes to check if we should draw grapples. 
+            var nodeToDrawGrapples;
+            // We need to keep the number of selected nodes to check if we should draw grapples.
             // Calculating it each time decreases performance.
             var numberOfSelectedNodes;
             // Events to bind and unbind
             var eUnselectNode, ePositionNode, eZoom, ePan, eSelectNode, eRemoveNode, eAddNode, eFreeNode;
-            
+
             // Initilize nodes to draw grapples and the number of selected nodes
             {
-              var selectedNodes = cy.nodes(':selected');
-              numberOfSelectedNodes = selectedNodes.length;
+                var selectedNodes = cy.nodes(':selected');
+                numberOfSelectedNodes = selectedNodes.length;
 
-              if (numberOfSelectedNodes === 1) {
-                nodeToDrawGrapples = selectedNodes[0];
-              }
+                if (numberOfSelectedNodes === 1) {
+                    nodeToDrawGrapples = selectedNodes[0];
+                }
             }
 
             options = $.extend(true, options, opts);
@@ -318,48 +318,48 @@
             // Resize the canvas
             var sizeCanvas = debounce( function(){
                 $canvas
-                  .attr('height', $container.height())
-                  .attr('width', $container.width())
-                  .css({
-                    'position': 'absolute',
-                    'top': 0,
-                    'left': 0,
-                    'z-index': '999'
-                  })
+                    .attr('height', $container.height())
+                    .attr('width', $container.width())
+                    .css({
+                        'position': 'absolute',
+                        'top': 0,
+                        'left': 0,
+                        'z-index': '999'
+                    })
                 ;
 
                 setTimeout(function () {
-                  var canvasBb = $canvas.offset();
-                  var containerBb = $container.offset();
+                    var canvasBb = $canvas.offset();
+                    var containerBb = $container.offset();
 
-                  $canvas
-                    .css({
-                      'top': -(canvasBb.top - containerBb.top),
-                      'left': -(canvasBb.left - containerBb.left)
-                    })
-                  ;
-                  
-                  // If there is a previously created canvas destroy it and reset the canvas
-                  if (canvas) {
-                    canvas.destroy();
-                  }
-                  // See if old canvas is destroyed
-                  canvas = oCanvas.create({
-                    canvas: "#node-resize"
-                  });
+                    $canvas
+                        .css({
+                            'top': -(canvasBb.top - containerBb.top),
+                            'left': -(canvasBb.left - containerBb.left)
+                        })
+                    ;
 
-                  // redraw on canvas resize
-                  if(cy){
-                    refreshGrapples();
-                  }
+                    // If there is a previously created canvas destroy it and reset the canvas
+                    if (canvas) {
+                        canvas.destroy();
+                    }
+                    // See if old canvas is destroyed
+                    canvas = oCanvas.create({
+                        canvas: "#node-resize"
+                    });
+
+                    // redraw on canvas resize
+                    if(cy){
+                        refreshGrapples();
+                    }
                 }, 0);
 
-              }, 250 );
+            }, 250 );
 
-              sizeCanvas();
+            sizeCanvas();
 
             $(window).on('resize', sizeCanvas);
-            
+
 
             oCanvas.registerDisplayObject("dashedRectangle", function (settings, core) {
 
@@ -394,10 +394,10 @@
             var clearDrawing = function () {
                 // reset the canvas
                 canvas.reset();
-                
+
                 // Normally canvas.reset() should clear the drawings as well.
-                // It works as expected id windows is never resized however if it is resized the drawings are not cleared unexpectedly. 
-                // Therefore we need to access the canvas and clear the rectangle (Note that canvas.clear(false) does not work as expected 
+                // It works as expected id windows is never resized however if it is resized the drawings are not cleared unexpectedly.
+                // Therefore we need to access the canvas and clear the rectangle (Note that canvas.clear(false) does not work as expected
                 // as well so wee need to do it manually.) TODO: Figure out the bug clearly and file it to oCanvas library.
                 var w = $container.width();
                 var h = $container.height();
@@ -566,7 +566,7 @@
 
                     startPos.x = x;
                     startPos.y = y;
-                    
+
                     cy.trigger("noderesize.resizedrag", [t, node]);
                 };
 
@@ -626,138 +626,137 @@
 
             var refreshGrapples = function () {
                 clearDrawing();
-                
+
                 // If the node to draw grapples is defined it means that there is just one node selected and
                 // we need to draw grapples for that node.
                 if(nodeToDrawGrapples) {
                     drawGrapples(nodeToDrawGrapples);
                 }
             };
-            
-            function getTopMostNodes(nodes) {
-				var nodesMap = {};
-				for (var i = 0; i < nodes.length; i++) {
-					nodesMap[nodes[i].id()] = true;
-				}
-				var roots = nodes.filter(function (i, ele) {
-					var parent = ele.parent()[0];
-					while(parent != null){
-						if(nodesMap[parent.id()]){
-							return false;
-						}
-						parent = parent.parent()[0];
-					}
-					return true;
-				});
 
-				return roots;
-			}
-			
-			function moveNodes(positionDiff, nodes) {
+            function getTopMostNodes(nodes) {
+                var nodesMap = {};
+                for (var i = 0; i < nodes.length; i++) {
+                    nodesMap[nodes[i].id()] = true;
+                }
+                var roots = nodes.filter(function (i, ele) {
+                    var parent = ele.parent()[0];
+                    while(parent != null){
+                        if(nodesMap[parent.id()]){
+                            return false;
+                        }
+                        parent = parent.parent()[0];
+                    }
+                    return true;
+                });
+
+                return roots;
+            }
+
+            function moveNodes(positionDiff, nodes) {
                 // Get the descendants of top most nodes. Note that node.position() can move just the simple nodes.
                 var topMostNodes = getTopMostNodes(nodes);
                 var nodesToMove = topMostNodes.union(topMostNodes.descendants());
-                
-				nodesToMove.positions(function(i, node) {
-                  var oldX = node.position("x");
-                  var oldY = node.position("y");
-                  return {
-                    x: oldX + positionDiff.x,
-                    y: oldY + positionDiff.y
-                  };
+
+                nodesToMove.positions(function(i, node) {
+                    var oldX = node.position("x");
+                    var oldY = node.position("y");
+                    return {
+                        x: oldX + positionDiff.x,
+                        y: oldY + positionDiff.y
+                    };
                 });
-			}
-			
-			var selectedNodesToMove;
-			//var selectedNodesPosition;
-			var nodesMoving = false;
-			
-			var keys = {};
-			function keyDown(e) {
+            }
 
+            var selectedNodesToMove;
+            var nodesMoving = false;
 
-				keys[e.keyCode] = true;
-				switch(e.keyCode){
-				    case 37: case 39: case 38:  case 40: // Arrow keys
-				    case 32: e.preventDefault(); break; // Space
-				    default: break; // do not block other keys
-				}
+            var keys = {};
+            function keyDown(e) {
+                //Checks if the tagname is textarea or input
+                var tn = document.activeElement.tagName;
+                if (tn != "TEXTAREA" && tn != "INPUT")
+                {
+                    keys[e.keyCode] = true;
+                    switch(e.keyCode){
+                        case 37: case 39: case 38:  case 40: // Arrow keys
+                        case 32: e.preventDefault(); break; // Space
+                        default: break; // do not block other keys
+                    }
 
+					
+                    if (e.keyCode < '37' || e.keyCode > '40') {
+                        return;
+                    }
 
+                    if (!nodesMoving)
+                    {
+                        selectedNodesToMove = cy.nodes(':selected');
+                        cy.trigger("noderesize.movestart", [selectedNodesToMove]);
+                        nodesMoving = true;
+                    }
+                    if (e.altKey && e.which == '38') {
+                        // up arrow and alt
+                        moveNodes ({x:0, y:-1},selectedNodesToMove);
+                    }
+                    else if (e.altKey && e.which == '40') {
+                        // down arrow and alt
+                        moveNodes ({x:0, y:1},selectedNodesToMove);
+                    }
+                    else if (e.altKey && e.which == '37') {
+                        // left arrow and alt
+                        moveNodes ({x:-1, y:0},selectedNodesToMove);
+                    }
+                    else if (e.altKey && e.which == '39') {
+                        // right arrow and alt
+                        moveNodes ({x:1, y:0},selectedNodesToMove);
+                    }
 
-				//e = e || window.event;
-				if (e.keyCode < '37' || e.keyCode > '40') {
-					return;
-				}
-				
-				if (!nodesMoving)
-				{
-					selectedNodesToMove = cy.nodes(':selected');
-					cy.trigger("noderesize.movestart", [selectedNodesToMove]);			
-					nodesMoving = true;
-				}				
-				if (e.altKey && e.which == '38') {
-					// up arrow and alt
-					moveNodes ({x:0, y:-1},selectedNodesToMove);		
-				}
-				else if (e.altKey && e.which == '40') {
-					// down arrow and alt
-					moveNodes ({x:0, y:1},selectedNodesToMove);		
-				}
-				else if (e.altKey && e.which == '37') {
-					// left arrow and alt
-					moveNodes ({x:-1, y:0},selectedNodesToMove);				   
-				}
-				else if (e.altKey && e.which == '39') {
-					// right arrow and alt
-					moveNodes ({x:1, y:0},selectedNodesToMove);		     
-				}
-				
-				else if (e.shiftKey && e.which == '38') {
-					// up arrow and shift
-					moveNodes ({x:0, y:-10},selectedNodesToMove);		
-				}
-				else if (e.shiftKey && e.which == '40') {
-					// down arrow and shift
-					moveNodes ({x:0, y:10},selectedNodesToMove);	
-				}
-				else if (e.shiftKey && e.which == '37') {
-					// left arrow and shift
-					moveNodes ({x:-10, y:0},selectedNodesToMove);		
-				   
-				}
-				else if (e.shiftKey && e.which == '39' ) {
-					// right arrow and shift
-					moveNodes ({x:10, y:0},selectedNodesToMove);		     
-				}
-				
-				else if (e.keyCode == '38') {
-					// up arrow
-					moveNodes ({x:0, y:-3},selectedNodesToMove);	
-				}
-				else if (e.keyCode == '40') {
-					// down arrow
-					moveNodes ({x:0, y:3},selectedNodesToMove);
-				}
-				else if (e.keyCode == '37') {
-					// left arrow
-					moveNodes ({x:-3, y:0},selectedNodesToMove);
-				}
-				else if (e.keyCode == '39') {
-					//right arrow
-					moveNodes ({x:3, y:0},selectedNodesToMove);
-				}
-			}
-			
-			function keyUp(e) {
+                    else if (e.shiftKey && e.which == '38') {
+                        // up arrow and shift
+                        moveNodes ({x:0, y:-10},selectedNodesToMove);
+                    }
+                    else if (e.shiftKey && e.which == '40') {
+                        // down arrow and shift
+                        moveNodes ({x:0, y:10},selectedNodesToMove);
+                    }
+                    else if (e.shiftKey && e.which == '37') {
+                        // left arrow and shift
+                        moveNodes ({x:-10, y:0},selectedNodesToMove);
+
+                    }
+                    else if (e.shiftKey && e.which == '39' ) {
+                        // right arrow and shift
+                        moveNodes ({x:10, y:0},selectedNodesToMove);
+                    }
+
+                    else if (e.keyCode == '38') {
+                        // up arrow
+                        moveNodes ({x:0, y:-3},selectedNodesToMove);
+                    }
+                    else if (e.keyCode == '40') {
+                        // down arrow
+                        moveNodes ({x:0, y:3},selectedNodesToMove);
+                    }
+                    else if (e.keyCode == '37') {
+                        // left arrow
+                        moveNodes ({x:-3, y:0},selectedNodesToMove);
+                    }
+                    else if (e.keyCode == '39') {
+                        //right arrow
+                        moveNodes ({x:3, y:0},selectedNodesToMove);
+                    }
+                }
+            }
+
+            function keyUp(e) {
                 if (e.keyCode < '37' || e.keyCode > '40') {
                     return;
                 }
-                //undo redo part goes here		
+
                 cy.trigger("noderesize.moveend", [selectedNodesToMove]);
                 selectedNodesToMove = undefined;
-                //selectedNodesPosition = undefined;
-                nodesMoving = false;				
+                nodesMoving = false;
             }
 
             var unBindEvents = function() {
@@ -775,18 +774,18 @@
             var bindEvents = function() {
                 cy.on("unselect", "node", eUnselectNode = function() {
                     numberOfSelectedNodes = numberOfSelectedNodes - 1;
-                    
-                    if (numberOfSelectedNodes === 1) {
-                      var selectedNodes = cy.nodes(':selected');
 
-                      // If user unselects all nodes by tapping to the core etc. then our 'numberOfSelectedNodes'
-                      // may be misleading. Therefore we need to check if the number of nodes to draw grapples is really 1 here.
-                      if (selectedNodes.length === 1) {
-                          nodeToDrawGrapples = selectedNodes[0];
-                      }
-                      else {
-                          nodeToDrawGrapples = undefined;
-                      }
+                    if (numberOfSelectedNodes === 1) {
+                        var selectedNodes = cy.nodes(':selected');
+
+                        // If user unselects all nodes by tapping to the core etc. then our 'numberOfSelectedNodes'
+                        // may be misleading. Therefore we need to check if the number of nodes to draw grapples is really 1 here.
+                        if (selectedNodes.length === 1) {
+                            nodeToDrawGrapples = selectedNodes[0];
+                        }
+                        else {
+                            nodeToDrawGrapples = undefined;
+                        }
                     }
                     else {
                         nodeToDrawGrapples = undefined;
@@ -794,7 +793,7 @@
 
                     refreshGrapples();
                 });
-                
+
                 cy.on("select", "node", eSelectNode = function() {
                     var node = this;
 
@@ -808,7 +807,7 @@
                     }
                     refreshGrapples();
                 });
-                
+
                 cy.on("remove", "node", eRemoveNode = function() {
                     var node = this;
                     // If a selected node is removed we should regard this event just like an unselect event
@@ -816,7 +815,7 @@
                         eUnselectNode();
                     }
                 });
-                
+
                 cy.on("add", "node", eAddNode = function() {
                     var node = this;
                     // If a selected node is added we should regard this event just like a select event
@@ -824,52 +823,41 @@
                         eSelectNode();
                     }
                 });
-                
+
                 cy.on("position", "node", ePositionNode = function() {
                     var node = this;
                     if ( nodeToDrawGrapples && nodeToDrawGrapples.id() === node.id() ) {
                         refreshGrapples();
                     }
                 });
-                
+
                 /*
                  * Interestingly when a node is positioned programatically 'position' event is triggered for its ancestors as well if their position changed.
                  * However it is not triggered for them when the node is freed. Therefore we need to handle "free" case and check if the nodeToGrapples
                  * is an anchestor of the freed node.
                  */
                 cy.on("free", "node", eFreeNode =function() {
-                  var node = this;
-                  
-                  if( nodeToDrawGrapples && nodeToDrawGrapples.id() !== node.id() && node.ancestors(":selected").id() == nodeToDrawGrapples.id() ) {
-                    refreshGrapples();
-                  }
-                });
-                
-                cy.on("zoom", eZoom = function() {
-                    if ( nodeToDrawGrapples ) {
-                      refreshGrapples();
+                    var node = this;
+
+                    if( nodeToDrawGrapples && nodeToDrawGrapples.id() !== node.id() && node.ancestors(":selected").id() == nodeToDrawGrapples.id() ) {
+                        refreshGrapples();
                     }
                 });
-                
-                cy.on("pan", ePan = function() {
-                  if ( nodeToDrawGrapples ) {
-                    refreshGrapples();
-                  }
+
+                cy.on("zoom", eZoom = function() {
+                    if ( nodeToDrawGrapples ) {
+                        refreshGrapples();
+                    }
                 });
-                
-		/*var keys = {};
-		window.addEventListener("keydown",
-		    function(e){
-			keys[e.keyCode] = true;
-			switch(e.keyCode){
-			    case 37: case 39: case 38:  case 40: // Arrow keys
-			    case 32: e.preventDefault(); break; // Space
-			    default: break; // do not block other keys
-			}
-		    },
-		false);*/
+
+                cy.on("pan", ePan = function() {
+                    if ( nodeToDrawGrapples ) {
+                        refreshGrapples();
+                    }
+                });
+
                 document.addEventListener("keydown",keyDown, true);
-		document.addEventListener("keyup",keyUp, true);
+                document.addEventListener("keyup",keyUp, true);
             };
             bindEvents();
 
@@ -888,47 +876,47 @@
                         position: $.extend({}, node.position())
                     };
                 });
-                
+
                 cy.on("noderesize.resizeend", function (e, type, node) {
                     param.firstTime = true;
                     cy.undoRedo().do("resize", param);
                     param = undefined;
                 });
-                
+
                 cy.on("noderesize.movestart", function (e, nodes) {
-					
-					moveparam = {
-						firstTime : true,
-						firstNodePosition: {
-							x: nodes[0].position('x'),
-							y: nodes[0].position('y')
-						},
-						nodes: nodes
-					}										
+
+                    moveparam = {
+                        firstTime : true,
+                        firstNodePosition: {
+                            x: nodes[0].position('x'),
+                            y: nodes[0].position('y')
+                        },
+                        nodes: nodes
+                    }
                 });
-				
-				cy.on("noderesize.moveend", function (e, nodes) {
-					var initialPos = moveparam.firstNodePosition;
-					
-					moveparam.positionDiff = {
-						x: -nodes[0].position('x') + initialPos.x,
-						y: -nodes[0].position('y') + initialPos.y
-					}
-					
-					delete moveparam.firstNodePosition;
-					
+
+                cy.on("noderesize.moveend", function (e, nodes) {
+                    var initialPos = moveparam.firstNodePosition;
+
+                    moveparam.positionDiff = {
+                        x: -nodes[0].position('x') + initialPos.x,
+                        y: -nodes[0].position('y') + initialPos.y
+                    }
+
+                    delete moveparam.firstNodePosition;
+
                     cy.undoRedo().do("noderesize.move", moveparam);
                     moveparam = undefined;
-                });	
+                });
 
                 var resizeDo = function (arg) {
                     if (arg.firstTime) {
                         delete arg.firstTime;
                         return arg;
                     }
-                    
+
                     var node = arg.node;
-                    
+
                     var result = {
                         node: node,
                         css: {
@@ -937,37 +925,37 @@
                         },
                         position: $.extend({}, node.position())
                     };
-                    
+
                     node.position(arg.position)
-                            .css("width", arg.css.width)
-                            .css("height", arg.css.height);
-                    
+                        .css("width", arg.css.width)
+                        .css("height", arg.css.height);
+
                     refreshGrapples(); // refresh grapplers after node resize
-                    
+
                     return result;
                 };
-                
+
                 var moveDo = function (arg) {
                     if (arg.firstTime) {
                         delete arg.firstTime;
                         return arg;
                     }
-						
+
                     var nodes = arg.nodes;
-					
-					var positionDiff = arg.positionDiff;
-					
+
+                    var positionDiff = arg.positionDiff;
+
                     var result = {
                         nodes: nodes,
                         positionDiff: {
-							x: -positionDiff.x,
-							y: -positionDiff.y
-						}
+                            x: -positionDiff.x,
+                            y: -positionDiff.y
+                        }
                     };
-					
-					
-					moveNodes (positionDiff,nodes);  
-			        
+
+
+                    moveNodes (positionDiff,nodes);
+
                     return result;
                 };
 
