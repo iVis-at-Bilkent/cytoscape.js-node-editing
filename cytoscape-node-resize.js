@@ -776,6 +776,10 @@
 
             var bindEvents = function() {
                 cy.on("unselect", "node", eUnselectNode = function() {
+                    // reinitialize old and current compound positions
+                    oldPos = {x: undefined, y: undefined};
+                    currentPos = {x: 0, y: 0};
+
                     numberOfSelectedNodes = numberOfSelectedNodes - 1;
 
                     if (numberOfSelectedNodes === 1) {
