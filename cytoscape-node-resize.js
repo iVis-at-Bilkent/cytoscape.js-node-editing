@@ -826,25 +826,25 @@
                         eSelectNode();
                     }
                 });
+                
+                // declare old and current positions
+                var oldPos = {x: undefined, y: undefined};
+                var currentPos = {x : 0, y : 0};
 
+                // listens for position event and refreshGrapples if necessary
                 cy.on("position", "node", ePositionNode = function() {
                     var node = this;
-                    if ( nodeToDrawGrapples && nodeToDrawGrapples.id() === node.id() ) {
+                    // if position of selected node or compound changes refreshGrapples
+                    if (nodeToDrawGrapples && nodeToDrawGrapples.id() === node.id()){
                         refreshGrapples();
                     }
-                });
-
-                /*
-                 * Interestingly when a node is positioned programatically 'position' event is triggered for its ancestors as well if their position changed.
-                 * However it is not triggered for them when the node is freed. Therefore we need to handle "free" case and check if the nodeToGrapples
-                 * is an anchestor of the freed node.
-                 */
-                cy.on("free", "node", eFreeNode =function() {
-                    var node = this;
-
-                    if( nodeToDrawGrapples && nodeToDrawGrapples.id() !== node.id() && node.ancestors(":selected").id() == nodeToDrawGrapples.id() ) {
+                    // if the position of compund changes by repositioning its children's
+                    // Note: position event for compound is not triggered in this case
+                    else if (nodeToDrawGrapples && (currentPos.x != oldPos.x || currentPos.y != oldPos.y)){
+                        currentPos = nodeToDrawGrapples.position();
                         refreshGrapples();
-                    }
+                        oldPos = {x : currentPos.x, y : currentPos.y};
+                    };
                 });
 
                 cy.on("zoom", eZoom = function() {
