@@ -661,7 +661,10 @@
                 var topMostNodes = getTopMostNodes(nodes);
                 var nodesToMove = topMostNodes.union(topMostNodes.descendants());
 
-                nodesToMove.positions(function(i, node) {
+                nodesToMove.positions(function(node, i) {
+                    if(typeof node === "number") {
+                      node = i;
+                    }
                     var oldX = node.position("x");
                     var oldY = node.position("y");
                     return {
