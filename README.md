@@ -33,6 +33,17 @@ Only consists of initilization & default options.
                     var data = node.data("resizeMinHeight");
                     return data ? data : 15;
                 }, // a function returns min height of node
+
+                // These optional function will be executed to set the width/height of a node in this extension
+                // Using node.css() is not a recommended way (http://js.cytoscape.org/#eles.style) to do this. Therefore, overriding these defaults
+                // so that a data field or something like that will be used to set node dimentions instead of directly calling node.css() 
+                // is highly recommended (Of course this will require a proper setting in the stylesheet).
+                setWidth: function(node, width) { 
+                    node.css('width', width);
+                },
+                setHeight: function(node, height) {
+                    node.css('height', height);
+                },
     
                 isFixedAspectRatioResizeMode: function (node) { return node.is(".fixedAspectRatioResizeMode") },// with only 4 active grapples (at corners)
                 isNoResizeMode: function (node) { return node.is(".noResizeMode, :parent") }, // no active grapples
