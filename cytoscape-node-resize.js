@@ -270,7 +270,18 @@
                 var data = node.data("resizeMinHeight");
                 return data ? data : 15;
             }, // a function returns min height of node
-
+            
+            // These optional function will be executed to set the width/height of a node in this extension
+            // Using node.css() is not a recommended way (http://js.cytoscape.org/#eles.style) to do this. Therefore, overriding these defaults
+            // so that a data field or something like that will be used to set node dimentions instead of directly calling node.css() 
+            // is highly recommended (Of course this will require a proper setting in the stylesheet).
+            setWidth: function(node, width) { 
+                node.css('width', width);
+            },
+            setHeight: function(node, height) {
+                node.css('height', height);
+            },
+            
             isFixedAspectRatioResizeMode: function (node) { return node.is(".fixedAspectRatioResizeMode") },// with only 4 active grapples (at corners)
             isNoResizeMode: function (node) { return node.is(".noResizeMode, :parent") }, // no active grapples
 
@@ -544,23 +555,23 @@
                         if (t.startsWith("top")) {
                             if (node.height() - xHeight > options.minHeight(node)) {
                                 node.position("y", nodePos.y + xHeight / 2);
-                                node.css("height", node.height() - xHeight);
+                                options.setHeight(node, node.height() - xHeight);
                             } else if (isAspectedMode)
                                 return;
                         } else if (t.startsWith("bottom")) {
                             if (node.height() + xHeight > options.minHeight(node)) {
                                 node.position("y", nodePos.y + xHeight / 2);
-                                node.css("height", node.height() + xHeight);
+                                options.setHeight(node, node.height() + xHeight);
                             } else if (isAspectedMode)
                                 return;
                         }
 
                         if (t.endsWith("left") && node.width() - xWidth > options.minWidth(node)) {
                             node.position("x", nodePos.x + xWidth / 2);
-                            node.css("width", node.width() - xWidth);
+                            options.setWidth(node, node.width() - xWidth);
                         } else if (t.endsWith("right") && node.width() + xWidth > options.minWidth(node)) {
                             node.position("x", nodePos.x + xWidth / 2);
-                            node.css("width", node.width() + xWidth);
+                            options.setWidth(node, node.width() + xWidth);
                         }
                     });
 
@@ -936,9 +947,9 @@
                         position: $.extend({}, node.position())
                     };
 
-                    node.position(arg.position)
-                        .css("width", arg.css.width)
-                        .css("height", arg.css.height);
+                    node.position(arg.position);
+                    options.setWidth(node, arg.css.width);
+                    options.setHeight(node, arg.css.height);
 
                     refreshGrapples(); // refresh grapplers after node resize
 
