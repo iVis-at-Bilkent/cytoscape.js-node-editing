@@ -425,53 +425,54 @@
                 return options.padding*Math.max(1, cy.zoom());
             };
 
-            var drawGrapple = function (x, y, t, node, cur) {
-                if (options.isNoResizeMode(node) || (options.isFixedAspectRatioResizeMode(node) && t.indexOf("center") >= 0)) {
-                    var inactiveGrapple = canvas.display.rectangle({
-                        x: x,
-                        y: y,
-                        height: getGrappleSize(node),
-                        width: getGrappleSize(node),
-                        stroke: options.inactiveGrappleStroke
-                    });
+            var drawInactiveGrapple = function (x, y, t, node) {
+                var inactiveGrapple = canvas.display.rectangle({
+                    x: x,
+                    y: y,
+                    height: getGrappleSize(node),
+                    width: getGrappleSize(node),
+                    stroke: options.inactiveGrappleStroke
+                });
 
-                    canvas.addChild(inactiveGrapple);
+                canvas.addChild(inactiveGrapple, false);
 
 
-                    var eMouseEnter = function () {
-                        canvas.mouse.cursor(options.cursors.inactive);
-                        inactiveGrapple.bind("touchleave mouseleave", eMouseLeave);
-                    };
+                var eMouseEnter = function () {
+                    canvas.mouse.cursor(options.cursors.inactive);
+                    inactiveGrapple.bind("touchleave mouseleave", eMouseLeave);
+                };
 
-                    var eMouseLeave = function () {
-                        canvas.mouse.cursor(options.cursors.default);
-                        inactiveGrapple.unbind("touchleave mouseleave", eMouseLeave);
-                    };
+                var eMouseLeave = function () {
+                    canvas.mouse.cursor(options.cursors.default);
+                    inactiveGrapple.unbind("touchleave mouseleave", eMouseLeave);
+                };
 
-                    var eMouseDown = function () {
-                        cy.boxSelectionEnabled(false);
-                        cy.panningEnabled(false);
-                        cy.autounselectify(true);
-                        cy.autoungrabify(true);
-                        canvas.bind("touchend mouseup", eMouseUp);
-                    };
-                    var eMouseUp = function () {
-                        cy.boxSelectionEnabled(true);
-                        cy.panningEnabled(true);
-                        cy.autounselectify(false);
-                        cy.autoungrabify(false);
-                        setTimeout(function () {
-                            cy.$().unselect();
-                            node.select();
-                        }, 0);
-                        canvas.unbind("touchend mouseup", eMouseUp);
-                    };
+                var eMouseDown = function () {
+                    cy.boxSelectionEnabled(false);
+                    cy.panningEnabled(false);
+                    cy.autounselectify(true);
+                    cy.autoungrabify(true);
+                    canvas.bind("touchend mouseup", eMouseUp);
+                };
+                var eMouseUp = function () {
+                    cy.boxSelectionEnabled(true);
+                    cy.panningEnabled(true);
+                    cy.autounselectify(false);
+                    cy.autoungrabify(false);
+                    setTimeout(function () {
+                        cy.$().unselect();
+                        node.select();
+                    }, 0);
+                    canvas.unbind("touchend mouseup", eMouseUp);
+                };
 
-                    inactiveGrapple.bind("touchstart mousedown", eMouseDown);
-                    inactiveGrapple.bind("touchenter mouseenter", eMouseEnter);
+                inactiveGrapple.bind("touchstart mousedown", eMouseDown);
+                inactiveGrapple.bind("touchenter mouseenter", eMouseEnter);
 
-                    return inactiveGrapple;
-                }
+                return inactiveGrapple;
+            }
+
+            var drawActiveGrapple = function (x, y, t, node, cur) {
                 var grapple = canvas.display.rectangle({
                     x: x,
                     y: y,
@@ -480,7 +481,7 @@
                     fill: options.grappleColor
                 });
 
-                canvas.addChild(grapple);
+                canvas.addChild(grapple, false);
 
                 var startPos = {};
                 var tmpActiveBgOpacity;
@@ -594,8 +595,16 @@
                 grapple.bind("touchstart mousedown", eMouseDown);
                 grapple.bind("touchenter mouseenter", eMouseEnter);
 
-
                 return grapple;
+            }
+
+            var drawGrapple = function (x, y, t, node, cur) {
+                if (options.isNoResizeMode(node) || (options.isFixedAspectRatioResizeMode(node) && t.indexOf("center") >= 0)) {
+                    return drawInactiveGrapple(x, y, t, node);
+                }
+                else {
+                    return drawActiveGrapple(x, y, t, node, cur);
+                }
             };
 
             var drawGrapples = function (node) {
@@ -632,6 +641,7 @@
                 drawGrapple(startPos.x + width / 2 - gs / 2, startPos.y + height - gs / 2, "bottomcenter", node, options.cursors.s);
                 drawGrapple(startPos.x - gs / 2, startPos.y + height - gs / 2, "bottomleft", node, options.cursors.sw);
                 drawGrapple(startPos.x - gs / 2, startPos.y + height / 2 - gs / 2, "centerleft", node, options.cursors.w);
+                canvas.redraw();
 
             };
 
