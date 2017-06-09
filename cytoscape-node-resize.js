@@ -238,12 +238,10 @@
     })();
 
     // registers the extension on a cytoscape lib ref
-    var register = function (cytoscape, $) {
+    var register = function (cytoscape, $, Konva) {
 
         // can't register if required libraries does not exist
-        // note that oCanvas is not parametrezid here because it is not commonjs nor amd compatible
-        // it is expected to be defined as a browser global
-        if (!cytoscape || !$ || !oCanvas) {
+        if (!cytoscape || !$ || !Konva) {
             return;
         }
 
@@ -304,6 +302,7 @@
             var cy = this;
             // Nodes to draw grapples this variable is set if there is just one selected node
             var nodeToDrawGrapples;
+            var controls;
             // We need to keep the number of selected nodes to check if we should draw grapples.
             // Calculating it each time decreases performance.
             var numberOfSelectedNodes;
@@ -322,13 +321,23 @@
 
             options = $.extend(true, options, opts);
 
-            var $canvas = $('<canvas id="node-resize"></canvas>');
+            var $canvasElement = $('<div id="node-resize"></div>');
             var $container = $(cy.container());
-            $container.append($canvas);
+            $container.append($canvasElement);
+
+            var stage = new Konva.Stage({
+                container: 'node-resize',   // id of container <div>
+                width: $container.width(),
+                height: $container.height()
+            });
+            // then create layer
+            canvas = new Konva.Layer();
+            // add the layer to the stage
+            stage.add(canvas);
 
             // Resize the canvas
             var sizeCanvas = debounce( function(){
-                $canvas
+                $canvasElement
                     .attr('height', $container.height())
                     .attr('width', $container.width())
                     .css({
@@ -336,33 +345,20 @@
                         'top': 0,
                         'left': 0,
                         'z-index': '999'
-                    })
-                ;
+                    });
 
                 setTimeout(function () {
-                    var canvasBb = $canvas.offset();
+                    var canvasBb = $canvasElement.offset();
                     var containerBb = $container.offset();
 
-                    $canvas
+                    $canvasElement
                         .css({
                             'top': -(canvasBb.top - containerBb.top),
                             'left': -(canvasBb.left - containerBb.left)
                         })
                     ;
-
-                    // If there is a previously created canvas destroy it and reset the canvas
-                    if (canvas) {
-                        canvas.destroy();
-                    }
-                    // See if old canvas is destroyed
-                    canvas = oCanvas.create({
-                        canvas: "#node-resize"
-                    });
-
-                    // redraw on canvas resize
-                    if(cy){
-                        refreshGrapples();
-                    }
+                    canvas.getStage().setWidth($container.width());
+                    canvas.getStage().setHeight($container.height());
                 }, 0);
 
             }, 250 );
@@ -371,38 +367,354 @@
 
             $(window).on('resize', sizeCanvas);
 
+            var ResizeControls = function (node) {
+                this.parent = node;
+                this.boundingRectangle = new BoundingRectangle(node);
+                var grappleLocations = ["topleft", "topcenter", "topright", "centerright", "bottomright",
+                                  "bottomcenter", "bottomleft", "centerleft"];
+                this.grapples = [];
+                for(var i=0; i < grappleLocations.length; i++) {
+                    var location = grappleLocations[i];
+                    console.log("create grapple", location);
+                    var isActive = true;
+                    if (options.isNoResizeMode(node) || (options.isFixedAspectRatioResizeMode(node) && location.indexOf("center") >= 0)) {
+                        isActive = false;
+                    }
+                    this.grapples.push(new Grapple(node, this, location, isActive))
+                };
+                canvas.draw();
+            };
 
-            oCanvas.registerDisplayObject("dashedRectangle", function (settings, core) {
+            ResizeControls.prototype.update = function () {
+                this.boundingRectangle.update();
+                for(var i=0; i < this.grapples.length; i++) {
+                    this.grapples[i].update();
+                };
+                canvas.draw();
+            };
 
-                return oCanvas.extend({
-                    core: core,
+            ResizeControls.prototype.remove = function () {
+                this.boundingRectangle.shape.destroy();
+                delete this.boundingRectangle;
+                for(var i=0; i < this.grapples.length; i++) {
+                    this.grapples[i].shape.destroy();
+                };
+                delete this.grapples;
+                canvas.draw();
+            };
 
-                    shapeType: "rectangular",
+            var BoundingRectangle = function (node) {
+                this.parent = node;
+                this.shape = null;
 
-                    draw: function () {
-                        var canvas = this.core.canvas,
-                            origin = this.getOrigin(),
-                            x = this.abs_x - origin.x + this.lineWidth/2,
-                            y = this.abs_y - origin.y + this.lineWidth/2,
-                            width = this.width,
-                            height = this.height;
+                var nodePos = node.renderedPosition();
+                var width = node.renderedOuterWidth() + getPadding();
+                var height = node.renderedOuterHeight() + getPadding();
+                var startPos = {
+                    x: nodePos.x - width / 2,
+                    y: nodePos.y - height / 2
+                };
+                // create our shape
+                var rect = new Konva.Rect({
+                    x: startPos.x,
+                    y: startPos.y,
+                    width: width,
+                    height: height,
+                    stroke: options.boundingRectangleLineColor,
+                    strokeWidth: options.boundingRectangleLineWidth,
+                    dash: options.boundingRectangleLineDash
+                });
+                // add the shape to the layer
+                canvas.add(rect);
+                this.shape = rect;
 
-                        canvas.beginPath();
+                console.log(startPos, canvas, node.position());
+            };
 
+            BoundingRectangle.prototype.update = function () {
+                var nodePos = this.parent.renderedPosition();
+                var width = this.parent.renderedOuterWidth() + getPadding();
+                var height = this.parent.renderedOuterHeight() + getPadding();
+                var startPos = {
+                    x: nodePos.x - width / 2,
+                    y: nodePos.y - height / 2
+                };
+                this.shape.x(startPos.x);
+                this.shape.y(startPos.y);
+                this.shape.width(width);
+                this.shape.height(height);
+            };
 
-                        if (this.lineWidth > 0) {
-                            canvas.strokeStyle = this.lineColor;
-                            canvas.lineWidth = this.lineWidth;
-                            canvas.setLineDash(this.lineDash);
-                            canvas.strokeRect(x, y, width, height);
+            var Grapple = function (node, resizeControls, location, isActive) {
+                this.parent = node;
+                this.location = location;
+                this.isActive = isActive;
+                this.resizeControls = resizeControls;
+
+                var nodePos = node.renderedPosition();
+                var width = node.renderedOuterWidth() + getPadding();
+                var height = node.renderedOuterHeight() + getPadding();
+                var startPos = {
+                    x: nodePos.x - width / 2,
+                    y: nodePos.y - height / 2
+                };
+
+                var gs = getGrappleSize(node);
+
+                this.shape = new Konva.Rect({
+                    width: gs,
+                    height: gs
+                });
+                if(this.isActive) {
+                    this.shape.fill(options.grappleColor);
+                }
+                else {
+                    // we need to parse the inactiveGrappleStroke option that is composed of 3 parts
+                    var parts = options.inactiveGrappleStroke.split(' ');
+                    var color = parts[2];
+                    var strokeWidth = parseInt(parts[1].replace(/px/, ''));
+                    this.shape.stroke(color);
+                    this.shape.strokeWidth(strokeWidth);
+                }
+
+                this.updateShapePosition(startPos, width, height, gs);
+                canvas.add(this.shape);
+
+                if(this.isActive) {
+                    this.bindActiveEvents();
+                }
+                else {
+                    this.bindInactiveEvents();
+                }
+            };
+
+            Grapple.prototype.bindInactiveEvents = function () {
+                var self = this; // keep reference to the grapple object inside events
+
+                var eMouseEnter = function (event) {
+                    event.target.getStage().container().style.cursor = options.cursors.inactive;
+                };
+
+                var eMouseLeave = function (event) {
+                    event.target.getStage().container().style.cursor = options.cursors.default;
+                };
+
+                var eMouseDown = function (event) {
+                    cy.boxSelectionEnabled(false);
+                    cy.panningEnabled(false);
+                    cy.autounselectify(true);
+                    cy.autoungrabify(true);
+                    canvas.getStage().on("contentTouchend contentMouseup", eMouseUp);
+                    nodeToDrawGrapples = self.parent; // keep global reference of the concerned node
+                };
+                var eMouseUp = function (event) {
+                    // stage scope
+                    cy.boxSelectionEnabled(true);
+                    cy.panningEnabled(true);
+                    cy.autounselectify(false);
+                    cy.autoungrabify(false);
+                    /*setTimeout(function () {
+                        cy.$().unselect();
+                        nodeToDrawGrapples.select();
+                    }, 0);*/
+                    canvas.getStage().off("contentTouchend contentMouseup", eMouseUp);
+                };
+
+                this.shape.on("mouseenter", eMouseEnter);
+                this.shape.on("mouseleave", eMouseLeave);
+                this.shape.on("touchstart mousedown", eMouseDown);
+            };
+
+            Grapple.prototype.bindActiveEvents = function () {
+                var self = this; // keep reference to the grapple object inside events
+                var startPos = {};
+                var tmpActiveBgOpacity;
+
+                var eMouseDown = function (event) {
+                    cy.trigger("noderesize.resizestart", [self.location, self.parent]);
+                    tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
+                    cy.style()
+                        .selector("core")
+                        .style("active-bg-opacity", 0)
+                        .update();
+                    event.target.getStage().container().style.cursor = options.cursors[translateLocation[self.location]];
+                    var currentPointer = event.target.getStage().getPointerPosition();
+                    startPos.x = currentPointer.x;
+                    startPos.y = currentPointer.y;
+                    cy.boxSelectionEnabled(false);
+                    cy.panningEnabled(false);
+                    cy.autounselectify(true);
+                    cy.autoungrabify(true);
+                    self.shape.off("mouseenter", eMouseEnter);
+                    self.shape.off("mouseleave", eMouseLeave);
+                    //canvas.bind("touchmove mousemove", eMouseMove);
+                    //canvas.bind("touchend mouseup", eMouseUp);
+                    canvas.getStage().on("contentTouchend contentMouseup", eMouseUp);
+                    canvas.getStage().on("contentTouchmove contentMousemove", eMouseMove);
+                };
+
+                var eMouseUp = function (event) {
+                    cy.style()
+                        .selector("core")
+                        .style("active-bg-opacity", tmpActiveBgOpacity)
+                        .update();
+                    self.shape.getStage().container().style.cursor = options.cursors.default;
+                    cy.boxSelectionEnabled(true);
+                    cy.panningEnabled(true);
+                    setTimeout(function () { // for some reason, making node unselectable before doesn't work
+                        //cy.$().unselect();
+                        //node.select();
+                        cy.autounselectify(false); // think about those 2
+                        cy.autoungrabify(false);
+                    }, 0);
+                    cy.trigger("noderesize.resizeend", [self.location, self.parent]);
+                    canvas.getStage().off("contentTouchend contentMouseup", eMouseUp);
+                    canvas.getStage().off("contentTouchmove contentMousemove", eMouseMove);
+                    self.shape.on("mouseenter", eMouseEnter);
+                    self.shape.on("mouseleave", eMouseLeave);
+                    //canvas.unbind("touchmove mousemove", eMouseMove);
+                    //canvas.unbind("touchend mouseup", eMouseUp);
+                    //grapple.bind("touchenter mouseenter", eMouseEnter);
+                };
+
+                var eMouseMove = function (event) {
+                    var currentPointer = self.shape.getStage().getPointerPosition();
+                    var x = currentPointer.x;
+                    var y = currentPointer.y;
+
+                    var xHeight = (y - startPos.y) / cy.zoom();
+                    var xWidth = (x - startPos.x) / cy.zoom();
+
+                    var node = self.parent;
+                    var location = self.location;
+                    cy.batch(function () {
+                        var isAspectedMode = options.isFixedAspectRatioResizeMode(node);
+                        if ((isAspectedMode && location.indexOf("center") >= 0) ||
+                        options.isNoResizeMode(node))
+                            return;
+
+                        if (isAspectedMode) {
+                            var aspectRatio = node.height() / node.width();
+
+                            var aspectedSize = Math.min(xWidth, xHeight);
+
+                            var isCrossCorners = (location == "topright" || location == "bottomleft");
+                            if (xWidth > xHeight)
+                                xHeight = xWidth * aspectRatio * (isCrossCorners ? -1 : 1);
+                            else
+                                xWidth = xHeight / aspectRatio * (isCrossCorners ? -1 : 1);
                         }
 
-                        canvas.closePath();
-                    }
-                }, settings);
-            });
+                        var nodePos = node.position();
+
+                        if (location.startsWith("top")) {
+                            if (node.height() - xHeight > options.minHeight(node)) {
+                                node.position("y", nodePos.y + xHeight / 2);
+                                options.setHeight(node, node.height() - xHeight);
+                            } else if (isAspectedMode)
+                                return;
+                        } else if (location.startsWith("bottom")) {
+                            if (node.height() + xHeight > options.minHeight(node)) {
+                                node.position("y", nodePos.y + xHeight / 2);
+                                options.setHeight(node, node.height() + xHeight);
+                            } else if (isAspectedMode)
+                                return;
+                        }
+
+                        if (location.endsWith("left") && node.width() - xWidth > options.minWidth(node)) {
+                            node.position("x", nodePos.x + xWidth / 2);
+                            options.setWidth(node, node.width() - xWidth);
+                        } else if (location.endsWith("right") && node.width() + xWidth > options.minWidth(node)) {
+                            node.position("x", nodePos.x + xWidth / 2);
+                            options.setWidth(node, node.width() + xWidth);
+                        }
+                    });
+
+                    startPos.x = x;
+                    startPos.y = y;
+                    self.resizeControls.update();
+
+                    cy.trigger("noderesize.resizedrag", [location, node]);
+                };
+
+                var translateLocation = {
+                    "topleft": "nw",
+                    "topcenter": "n",
+                    "topright": "ne",
+                    "centerright": "e",
+                    "bottomright": "se",
+                    "bottomcenter": "s",
+                    "bottomleft": "sw",
+                    "centerleft": "w"
+                };
+                var eMouseEnter = function (event) {
+                    event.target.getStage().container().style.cursor = options.cursors[translateLocation[self.location]];
+                };
+
+                var eMouseLeave = function (event) {
+                    event.target.getStage().container().style.cursor = options.cursors.default;
+                };
+
+                this.shape.on("mouseenter", eMouseEnter);
+                this.shape.on("mouseleave", eMouseLeave);
+                this.shape.on("touchstart mousedown", eMouseDown);
+            };
+
+            Grapple.prototype.update = function() {
+                var nodePos = this.parent.renderedPosition();
+                var width = this.parent.renderedOuterWidth() + getPadding();
+                var height = this.parent.renderedOuterHeight() + getPadding();
+                var startPos = {
+                    x: nodePos.x - width / 2,
+                    y: nodePos.y - height / 2
+                };
+
+                var gs = getGrappleSize(this.parent);
+
+                this.shape.width(gs);
+                this.shape.height(gs);
+                this.updateShapePosition(startPos, width, height, gs);
+            };
+
+            Grapple.prototype.updateShapePosition = function (startPos, width, height, gs) {
+                switch(this.location) {
+                    case "topleft":
+                        this.shape.x(startPos.x - gs / 2);
+                        this.shape.y(startPos.y - gs / 2);
+                        break;
+                    case "topcenter":
+                        this.shape.x(startPos.x + width / 2 - gs / 2);
+                        this.shape.y(startPos.y - gs / 2);
+                        break;
+                    case "topright":
+                        this.shape.x(startPos.x + width - gs / 2);
+                        this.shape.y(startPos.y - gs / 2);
+                        break;
+                    case "centerright":
+                        this.shape.x(startPos.x + width - gs / 2);
+                        this.shape.y(startPos.y + height / 2 - gs / 2);
+                        break;
+                    case "bottomright":
+                        this.shape.x(startPos.x + width - gs / 2);
+                        this.shape.y(startPos.y + height - gs / 2);
+                        break;
+                    case "bottomcenter":
+                        this.shape.x(startPos.x + width / 2 - gs / 2);
+                        this.shape.y(startPos.y + height - gs / 2);
+                        break;
+                    case "bottomleft":
+                        this.shape.x(startPos.x - gs / 2);
+                        this.shape.y(startPos.y + height - gs / 2);
+                        break;
+                    case "centerleft":
+                        this.shape.x(startPos.x - gs / 2);
+                        this.shape.y(startPos.y + height / 2 - gs / 2);
+                        break;
+                }
+            };
 
             var clearDrawing = function () {
+                throw new Error("clearDrawing should not be called");
                 // reset the canvas
                 canvas.reset();
 
@@ -425,227 +737,8 @@
                 return options.padding*Math.max(1, cy.zoom());
             };
 
-            var drawInactiveGrapple = function (x, y, t, node) {
-                var inactiveGrapple = canvas.display.rectangle({
-                    x: x,
-                    y: y,
-                    height: getGrappleSize(node),
-                    width: getGrappleSize(node),
-                    stroke: options.inactiveGrappleStroke
-                });
-
-                canvas.addChild(inactiveGrapple, false);
-
-
-                var eMouseEnter = function () {
-                    canvas.mouse.cursor(options.cursors.inactive);
-                    inactiveGrapple.bind("touchleave mouseleave", eMouseLeave);
-                };
-
-                var eMouseLeave = function () {
-                    canvas.mouse.cursor(options.cursors.default);
-                    inactiveGrapple.unbind("touchleave mouseleave", eMouseLeave);
-                };
-
-                var eMouseDown = function () {
-                    cy.boxSelectionEnabled(false);
-                    cy.panningEnabled(false);
-                    cy.autounselectify(true);
-                    cy.autoungrabify(true);
-                    canvas.bind("touchend mouseup", eMouseUp);
-                };
-                var eMouseUp = function () {
-                    cy.boxSelectionEnabled(true);
-                    cy.panningEnabled(true);
-                    cy.autounselectify(false);
-                    cy.autoungrabify(false);
-                    setTimeout(function () {
-                        cy.$().unselect();
-                        node.select();
-                    }, 0);
-                    canvas.unbind("touchend mouseup", eMouseUp);
-                };
-
-                inactiveGrapple.bind("touchstart mousedown", eMouseDown);
-                inactiveGrapple.bind("touchenter mouseenter", eMouseEnter);
-
-                return inactiveGrapple;
-            }
-
-            var drawActiveGrapple = function (x, y, t, node, cur) {
-                var grapple = canvas.display.rectangle({
-                    x: x,
-                    y: y,
-                    height: getGrappleSize(node),
-                    width: getGrappleSize(node),
-                    fill: options.grappleColor
-                });
-
-                canvas.addChild(grapple, false);
-
-                var startPos = {};
-                var tmpActiveBgOpacity;
-                var eMouseDown = function () {
-                    cy.trigger("noderesize.resizestart", [t, node]);
-                    tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
-                    cy.style()
-                        .selector("core")
-                        .style("active-bg-opacity", 0)
-                        .update();
-                    canvas.mouse.cursor(cur);
-                    startPos.x = this.core.pointer.x;
-                    startPos.y = this.core.pointer.y;
-                    cy.boxSelectionEnabled(false);
-                    cy.panningEnabled(false);
-                    cy.autounselectify(true);
-                    cy.autoungrabify(true);
-                    grapple.unbind("touchleave mouseleave", eMouseLeave);
-                    grapple.unbind("touchenter mouseenter", eMouseEnter);
-                    canvas.bind("touchmove mousemove", eMouseMove);
-                    canvas.bind("touchend mouseup", eMouseUp);
-                };
-                var eMouseUp = function () {
-                    cy.style()
-                        .selector("core")
-                        .style("active-bg-opacity", tmpActiveBgOpacity)
-                        .update();
-                    canvas.mouse.cursor(options.cursors.default);
-                    cy.boxSelectionEnabled(true);
-                    cy.panningEnabled(true);
-                    cy.autounselectify(false);
-                    cy.autoungrabify(false);
-                    cy.trigger("noderesize.resizeend", [t, node]);
-                    setTimeout(function () {
-                        cy.$().unselect();
-                        node.select();
-                    }, 0);
-                    canvas.unbind("touchmove mousemove", eMouseMove);
-                    canvas.unbind("touchend mouseup", eMouseUp);
-                    grapple.bind("touchenter mouseenter", eMouseEnter);
-                };
-                var eMouseMove = function () {
-                    var core = this;
-                    var x = core.pointer.x;
-                    var y = core.pointer.y;
-
-                    var xHeight = (y - startPos.y) / cy.zoom();
-                    var xWidth = (x - startPos.x) / cy.zoom();
-
-                    cy.batch(function () {
-                        var isAspectedMode = options.isFixedAspectRatioResizeMode(node);
-                        if ((isAspectedMode && t.indexOf("center") >= 0) ||
-                            options.isNoResizeMode(node))
-                            return;
-
-                        if (isAspectedMode) {
-                            var aspectRatio = node.height() / node.width();
-
-                            var aspectedSize = Math.min(xWidth, xHeight);
-
-                            var isCrossCorners = (t == "topright") || (t == "bottomleft");
-                            if (xWidth > xHeight)
-                                xHeight = xWidth * aspectRatio * (isCrossCorners ? -1 : 1);
-                            else
-                                xWidth = xHeight / aspectRatio * (isCrossCorners ? -1 : 1);
-
-                        }
-
-
-                        var nodePos = node.position();
-
-                        if (t.startsWith("top")) {
-                            if (node.height() - xHeight > options.minHeight(node)) {
-                                node.position("y", nodePos.y + xHeight / 2);
-                                options.setHeight(node, node.height() - xHeight);
-                            } else if (isAspectedMode)
-                                return;
-                        } else if (t.startsWith("bottom")) {
-                            if (node.height() + xHeight > options.minHeight(node)) {
-                                node.position("y", nodePos.y + xHeight / 2);
-                                options.setHeight(node, node.height() + xHeight);
-                            } else if (isAspectedMode)
-                                return;
-                        }
-
-                        if (t.endsWith("left") && node.width() - xWidth > options.minWidth(node)) {
-                            node.position("x", nodePos.x + xWidth / 2);
-                            options.setWidth(node, node.width() - xWidth);
-                        } else if (t.endsWith("right") && node.width() + xWidth > options.minWidth(node)) {
-                            node.position("x", nodePos.x + xWidth / 2);
-                            options.setWidth(node, node.width() + xWidth);
-                        }
-                    });
-
-                    startPos.x = x;
-                    startPos.y = y;
-
-                    cy.trigger("noderesize.resizedrag", [t, node]);
-                };
-
-                var eMouseEnter = function () {
-                    canvas.mouse.cursor(cur);
-                    grapple.bind("touchleave mouseleave", eMouseLeave);
-                };
-
-                var eMouseLeave = function () {
-                    canvas.mouse.cursor(options.cursors.default);
-                    grapple.unbind("touchleave mouseleave", eMouseLeave);
-                };
-
-                grapple.bind("touchstart mousedown", eMouseDown);
-                grapple.bind("touchenter mouseenter", eMouseEnter);
-
-                return grapple;
-            }
-
-            var drawGrapple = function (x, y, t, node, cur) {
-                if (options.isNoResizeMode(node) || (options.isFixedAspectRatioResizeMode(node) && t.indexOf("center") >= 0)) {
-                    return drawInactiveGrapple(x, y, t, node);
-                }
-                else {
-                    return drawActiveGrapple(x, y, t, node, cur);
-                }
-            };
-
-            var drawGrapples = function (node) {
-                var nodePos = node.renderedPosition();
-                var width = node.renderedOuterWidth() + getPadding();
-                var height = node.renderedOuterHeight() + getPadding();
-                var startPos = {
-                    x: nodePos.x - width / 2,
-                    y: nodePos.y - height / 2
-                };
-
-                var gs = getGrappleSize(node);
-
-                if (options.boundingRectangle) {
-                    var rect = canvas.display.dashedRectangle({
-                        x: startPos.x,
-                        y: startPos.y,
-                        width: width,
-                        height: height,
-                        lineColor: options.boundingRectangleLineColor,
-                        lineWidth: options.boundingRectangleLineWidth,
-                        lineDash: options.boundingRectangleLineDash
-                    });
-                    canvas.addChild(rect);
-                }
-
-
-                // Clock turning
-                drawGrapple(startPos.x - gs / 2, startPos.y - gs / 2, "topleft", node, options.cursors.nw);
-                drawGrapple(startPos.x + width / 2 - gs / 2, startPos.y - gs / 2, "topcenter", node, options.cursors.n);
-                drawGrapple(startPos.x + width - gs / 2, startPos.y - gs / 2, "topright", node, options.cursors.ne);
-                drawGrapple(startPos.x + width - gs / 2, startPos.y + height / 2 - gs / 2, "centerright", node, options.cursors.e);
-                drawGrapple(startPos.x + width - gs / 2, startPos.y + height - gs / 2, "bottomright", node, options.cursors.se);
-                drawGrapple(startPos.x + width / 2 - gs / 2, startPos.y + height - gs / 2, "bottomcenter", node, options.cursors.s);
-                drawGrapple(startPos.x - gs / 2, startPos.y + height - gs / 2, "bottomleft", node, options.cursors.sw);
-                drawGrapple(startPos.x - gs / 2, startPos.y + height / 2 - gs / 2, "centerleft", node, options.cursors.w);
-                canvas.redraw();
-
-            };
-
             var refreshGrapples = function () {
+                throw new Error("refreshGrapples should not be called");
                 clearDrawing();
 
                 // If the node to draw grapples is defined it means that there is just one node selected and
@@ -799,12 +892,16 @@
             };
 
             var bindEvents = function() {
+                // declare old and current positions
+                var oldPos = {x: undefined, y: undefined};
+                var currentPos = {x : 0, y : 0};
                 cy.on("unselect", "node", eUnselectNode = function() {
+                    var node = this;
                     // reinitialize old and current compound positions
                     oldPos = {x: undefined, y: undefined};
                     currentPos = {x: 0, y: 0};
 
-                    numberOfSelectedNodes = numberOfSelectedNodes - 1;
+                    /*numberOfSelectedNodes = numberOfSelectedNodes - 1;
 
                     if (numberOfSelectedNodes === 1) {
                         var selectedNodes = cy.nodes(':selected');
@@ -822,13 +919,22 @@
                         nodeToDrawGrapples = undefined;
                     }
 
-                    refreshGrapples();
+                    refreshGrapples();*/
+                    if(cy.nodes(':selected').size() == 1) {
+                        controls = new ResizeControls(cy.nodes(':selected'));
+                    }
+                    else {
+                        if(controls) {
+                            controls.remove();
+                            controls = null;
+                        }
+                    }
                 });
 
                 cy.on("select", "node", eSelectNode = function() {
                     var node = this;
 
-                    numberOfSelectedNodes = numberOfSelectedNodes + 1;
+                    /*numberOfSelectedNodes = numberOfSelectedNodes + 1;
 
                     if (numberOfSelectedNodes === 1) {
                         nodeToDrawGrapples = node;
@@ -836,7 +942,16 @@
                     else {
                         nodeToDrawGrapples = undefined;
                     }
-                    refreshGrapples();
+                    refreshGrapples();*/
+                    if(cy.nodes(':selected').size() == 1) {
+                        controls = new ResizeControls(node);
+                    }
+                    else {
+                        if(controls) {
+                            controls.remove();
+                            controls = null;
+                        }
+                    }
                 });
 
                 cy.on("remove", "node", eRemoveNode = function() {
@@ -854,16 +969,12 @@
                         eSelectNode();
                     }
                 });
-                
-                // declare old and current positions
-                var oldPos = {x: undefined, y: undefined};
-                var currentPos = {x : 0, y : 0};
 
                 // listens for position event and refreshGrapples if necessary
                 cy.on("position", "node", ePositionNode = function() {
                     var node = this;
                     // if position of selected node or compound changes refreshGrapples
-                    if (nodeToDrawGrapples && nodeToDrawGrapples.id() === node.id()){
+                    /*if (nodeToDrawGrapples && nodeToDrawGrapples.id() === node.id()){
                         refreshGrapples();
                     }
                     // if the position of compund changes by repositioning its children's
@@ -872,18 +983,25 @@
                         currentPos = nodeToDrawGrapples.position();
                         refreshGrapples();
                         oldPos = {x : currentPos.x, y : currentPos.y};
-                    };
+                    };*/
+                    if(controls) {
+                        if(currentPos.x != oldPos.x || currentPos.y != oldPos.y) {
+                            currentPos = controls.parent.position();
+                            oldPos = {x : currentPos.x, y : currentPos.y};
+                        }
+                        controls.update();
+                    }
                 });
 
                 cy.on("zoom", eZoom = function() {
-                    if ( nodeToDrawGrapples ) {
-                        refreshGrapples();
+                    if ( controls ) {
+                        controls.update();
                     }
                 });
 
                 cy.on("pan", ePan = function() {
-                    if ( nodeToDrawGrapples ) {
-                        refreshGrapples();
+                    if ( controls ) {
+                        controls.update();
                     }
                 });
 
@@ -961,7 +1079,9 @@
                     options.setWidth(node, arg.css.width);
                     options.setHeight(node, arg.css.height);
 
-                    refreshGrapples(); // refresh grapplers after node resize
+                    if (controls) {
+                        controls.update(); // refresh grapplers after node resize
+                    }
 
                     return result;
                 };
@@ -1010,8 +1130,8 @@
         });
     }
 
-    if (typeof cytoscape !== 'undefined' && typeof jQuery !== "undefined") { // expose to global cytoscape (i.e. window.cytoscape)
-        register(cytoscape, jQuery);
+    if (typeof cytoscape !== 'undefined' && typeof jQuery !== "undefined" && typeof Konva !== "undefined") { // expose to global cytoscape (i.e. window.cytoscape)
+        register(cytoscape, jQuery, Konva);
     }
 
 })();
