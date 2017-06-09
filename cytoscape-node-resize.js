@@ -962,7 +962,7 @@
                     }
                 });
 
-                cy.on("add", "node", eAddNode = function() {
+                /*cy.on("add", "node", eAddNode = function() {
                     var node = this;
                     // If a selected node is added we should regard this event just like a select event
                     if ( node.selected() ) {
@@ -972,7 +972,7 @@
                         }
                         eSelectNode();
                     }
-                });
+                });*/
 
                 // listens for position event and refreshGrapples if necessary
                 cy.on("position", "node", ePositionNode = function() {
