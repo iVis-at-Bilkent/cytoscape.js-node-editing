@@ -300,24 +300,13 @@
 
         cytoscape('core', 'nodeResize', function (opts) {
             var cy = this;
-            // Nodes to draw grapples this variable is set if there is just one selected node
-            var nodeToDrawGrapples;
+
+            // the controls object represents the grapples and bounding rectangle
+            // only one can exist at any time
             var controls;
-            // We need to keep the number of selected nodes to check if we should draw grapples.
-            // Calculating it each time decreases performance.
-            var numberOfSelectedNodes;
+
             // Events to bind and unbind
             var eUnselectNode, ePositionNode, eZoom, ePan, eSelectNode, eRemoveNode, eAddNode, eFreeNode;
-
-            // Initilize nodes to draw grapples and the number of selected nodes
-            {
-                var selectedNodes = cy.nodes(':selected');
-                numberOfSelectedNodes = selectedNodes.length;
-
-                if (numberOfSelectedNodes === 1) {
-                    nodeToDrawGrapples = selectedNodes[0];
-                }
-            }
 
             options = $.extend(true, options, opts);
 
@@ -367,6 +356,15 @@
 
             $(window).on('resize', sizeCanvas);
 
+
+            /**
+             * ResizeControls is the object representing the graphical controls presented to the user.
+             * The controls are composed of:
+             * - 1 BoundingRectangle object
+             * - 8 Grapple objects
+             * 
+             * It is assumed that only one can exist at any time, and it is sotred in the global variable: controls.
+             */
             var ResizeControls = function (node) {
                 this.parent = node;
                 this.boundingRectangle = new BoundingRectangle(node);
@@ -505,7 +503,6 @@
                     cy.autounselectify(true);
                     cy.autoungrabify(true);
                     canvas.getStage().on("contentTouchend contentMouseup", eMouseUp);
-                    nodeToDrawGrapples = self.parent; // keep global reference of the concerned node
                 };
                 var eMouseUp = function (event) {
                     // stage scope
@@ -513,10 +510,6 @@
                     cy.panningEnabled(true);
                     cy.autounselectify(false);
                     cy.autoungrabify(false);
-                    /*setTimeout(function () {
-                        cy.$().unselect();
-                        nodeToDrawGrapples.select();
-                    }, 0);*/
                     canvas.getStage().off("contentTouchend contentMouseup", eMouseUp);
                 };
 
@@ -529,6 +522,18 @@
                 var self = this; // keep reference to the grapple object inside events
                 var startPos = {};
                 var tmpActiveBgOpacity;
+
+                // helper object
+                var translateLocation = {
+                    "topleft": "nw",
+                    "topcenter": "n",
+                    "topright": "ne",
+                    "centerright": "e",
+                    "bottomright": "se",
+                    "bottomcenter": "s",
+                    "bottomleft": "sw",
+                    "centerleft": "w"
+                };
 
                 var eMouseDown = function (event) {
                     cy.trigger("noderesize.resizestart", [self.location, self.parent]);
@@ -547,8 +552,6 @@
                     cy.autoungrabify(true);
                     self.shape.off("mouseenter", eMouseEnter);
                     self.shape.off("mouseleave", eMouseLeave);
-                    //canvas.bind("touchmove mousemove", eMouseMove);
-                    //canvas.bind("touchend mouseup", eMouseUp);
                     canvas.getStage().on("contentTouchend contentMouseup", eMouseUp);
                     canvas.getStage().on("contentTouchmove contentMousemove", eMouseMove);
                 };
@@ -562,8 +565,6 @@
                     cy.boxSelectionEnabled(true);
                     cy.panningEnabled(true);
                     setTimeout(function () { // for some reason, making node unselectable before doesn't work
-                        //cy.$().unselect();
-                        //node.select();
                         cy.autounselectify(false); // think about those 2
                         cy.autoungrabify(false);
                     }, 0);
@@ -572,9 +573,7 @@
                     canvas.getStage().off("contentTouchmove contentMousemove", eMouseMove);
                     self.shape.on("mouseenter", eMouseEnter);
                     self.shape.on("mouseleave", eMouseLeave);
-                    //canvas.unbind("touchmove mousemove", eMouseMove);
-                    //canvas.unbind("touchend mouseup", eMouseUp);
-                    //grapple.bind("touchenter mouseenter", eMouseEnter);
+
                 };
 
                 var eMouseMove = function (event) {
@@ -637,16 +636,6 @@
                     cy.trigger("noderesize.resizedrag", [location, node]);
                 };
 
-                var translateLocation = {
-                    "topleft": "nw",
-                    "topcenter": "n",
-                    "topright": "ne",
-                    "centerright": "e",
-                    "bottomright": "se",
-                    "bottomcenter": "s",
-                    "bottomleft": "sw",
-                    "centerleft": "w"
-                };
                 var eMouseEnter = function (event) {
                     event.target.getStage().container().style.cursor = options.cursors[translateLocation[self.location]];
                 };
@@ -713,39 +702,12 @@
                 }
             };
 
-            var clearDrawing = function () {
-                throw new Error("clearDrawing should not be called");
-                // reset the canvas
-                canvas.reset();
-
-                // Normally canvas.reset() should clear the drawings as well.
-                // It works as expected id windows is never resized however if it is resized the drawings are not cleared unexpectedly.
-                // Therefore we need to access the canvas and clear the rectangle (Note that canvas.clear(false) does not work as expected
-                // as well so wee need to do it manually.) TODO: Figure out the bug clearly and file it to oCanvas library.
-                var w = $container.width();
-                var h = $container.height();
-
-                canvas.canvas.clearRect(0, 0, w, h);
-
-            };
-
             var getGrappleSize = function (node) {
                 return Math.max(1, cy.zoom()) * options.grappleSize * Math.min(node.width()/25, node.height()/25, 1);
             };
 
             var getPadding = function () {
                 return options.padding*Math.max(1, cy.zoom());
-            };
-
-            var refreshGrapples = function () {
-                throw new Error("refreshGrapples should not be called");
-                clearDrawing();
-
-                // If the node to draw grapples is defined it means that there is just one node selected and
-                // we need to draw grapples for that node.
-                if(nodeToDrawGrapples) {
-                    drawGrapples(nodeToDrawGrapples);
-                }
             };
 
             function getTopMostNodes(nodes) {
@@ -901,25 +863,6 @@
                     oldPos = {x: undefined, y: undefined};
                     currentPos = {x: 0, y: 0};
 
-                    /*numberOfSelectedNodes = numberOfSelectedNodes - 1;
-
-                    if (numberOfSelectedNodes === 1) {
-                        var selectedNodes = cy.nodes(':selected');
-
-                        // If user unselects all nodes by tapping to the core etc. then our 'numberOfSelectedNodes'
-                        // may be misleading. Therefore we need to check if the number of nodes to draw grapples is really 1 here.
-                        if (selectedNodes.length === 1) {
-                            nodeToDrawGrapples = selectedNodes[0];
-                        }
-                        else {
-                            nodeToDrawGrapples = undefined;
-                        }
-                    }
-                    else {
-                        nodeToDrawGrapples = undefined;
-                    }
-
-                    refreshGrapples();*/
                     if(cy.nodes(':selected').size() == 1) {
                         controls = new ResizeControls(cy.nodes(':selected'));
                     }
@@ -934,15 +877,6 @@
                 cy.on("select", "node", eSelectNode = function() {
                     var node = this;
 
-                    /*numberOfSelectedNodes = numberOfSelectedNodes + 1;
-
-                    if (numberOfSelectedNodes === 1) {
-                        nodeToDrawGrapples = node;
-                    }
-                    else {
-                        nodeToDrawGrapples = undefined;
-                    }
-                    refreshGrapples();*/
                     if(cy.nodes(':selected').size() == 1) {
                         controls = new ResizeControls(node);
                     }
@@ -962,7 +896,9 @@
                     }
                 });
 
-                /*cy.on("add", "node", eAddNode = function() {
+                /*
+                // is this useful ? adding a node never seems to select it, and it causes a bug when changing parent
+                cy.on("add", "node", eAddNode = function() {
                     var node = this;
                     // If a selected node is added we should regard this event just like a select event
                     if ( node.selected() ) {
@@ -977,18 +913,9 @@
                 // listens for position event and refreshGrapples if necessary
                 cy.on("position", "node", ePositionNode = function() {
                     var node = this;
-                    // if position of selected node or compound changes refreshGrapples
-                    /*if (nodeToDrawGrapples && nodeToDrawGrapples.id() === node.id()){
-                        refreshGrapples();
-                    }
-                    // if the position of compund changes by repositioning its children's
-                    // Note: position event for compound is not triggered in this case
-                    else if (nodeToDrawGrapples && (currentPos.x != oldPos.x || currentPos.y != oldPos.y)){
-                        currentPos = nodeToDrawGrapples.position();
-                        refreshGrapples();
-                        oldPos = {x : currentPos.x, y : currentPos.y};
-                    };*/
                     if(controls) {
+                        // if the position of compund changes by repositioning its children's
+                        // Note: position event for compound is not triggered in this case
                         if(currentPos.x != oldPos.x || currentPos.y != oldPos.y) {
                             currentPos = controls.parent.position();
                             oldPos = {x : currentPos.x, y : currentPos.y};
