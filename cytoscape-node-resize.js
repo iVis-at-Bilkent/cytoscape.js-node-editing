@@ -966,6 +966,10 @@
                     var node = this;
                     // If a selected node is added we should regard this event just like a select event
                     if ( node.selected() ) {
+                        if(controls) {
+                            controls.remove();
+                            controls = null;
+                        }
                         eSelectNode();
                     }
                 });
