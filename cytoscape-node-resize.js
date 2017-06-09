@@ -373,7 +373,6 @@
                 this.grapples = [];
                 for(var i=0; i < grappleLocations.length; i++) {
                     var location = grappleLocations[i];
-                    console.log("create grapple", location);
                     var isActive = true;
                     if (options.isNoResizeMode(node) || (options.isFixedAspectRatioResizeMode(node) && location.indexOf("center") >= 0)) {
                         isActive = false;
@@ -425,8 +424,6 @@
                 // add the shape to the layer
                 canvas.add(rect);
                 this.shape = rect;
-
-                console.log(startPos, canvas, node.position());
             };
 
             BoundingRectangle.prototype.update = function () {
@@ -857,8 +854,7 @@
                 // declare old and current positions
                 var oldPos = {x: undefined, y: undefined};
                 var currentPos = {x : 0, y : 0};
-                cy.on("unselect", "node", eUnselectNode = function() {
-                    var node = this;
+                cy.on("unselect", "node", eUnselectNode = function(e) {
                     // reinitialize old and current compound positions
                     oldPos = {x: undefined, y: undefined};
                     currentPos = {x: 0, y: 0};
@@ -874,8 +870,8 @@
                     }
                 });
 
-                cy.on("select", "node", eSelectNode = function() {
-                    var node = this;
+                cy.on("select", "node", eSelectNode = function(e) {
+                    var node = e.target;
 
                     if(cy.nodes(':selected').size() == 1) {
                         controls = new ResizeControls(node);
@@ -888,31 +884,29 @@
                     }
                 });
 
-                cy.on("remove", "node", eRemoveNode = function() {
-                    var node = this;
+                cy.on("remove", "node", eRemoveNode = function(e) {
+                    var node = e.target;
                     // If a selected node is removed we should regard this event just like an unselect event
                     if ( node.selected() ) {
-                        eUnselectNode();
+                        eUnselectNode(e);
                     }
                 });
 
-                /*
                 // is this useful ? adding a node never seems to select it, and it causes a bug when changing parent
-                cy.on("add", "node", eAddNode = function() {
-                    var node = this;
+                cy.on("add", "node", eAddNode = function(e) {
+                    var node = e.target;
                     // If a selected node is added we should regard this event just like a select event
                     if ( node.selected() ) {
                         if(controls) {
                             controls.remove();
                             controls = null;
                         }
-                        eSelectNode();
+                        eSelectNode(e);
                     }
-                });*/
+                });
 
                 // listens for position event and refreshGrapples if necessary
-                cy.on("position", "node", ePositionNode = function() {
-                    var node = this;
+                cy.on("position", "node", ePositionNode = function(e) {
                     if(controls) {
                         // if the position of compund changes by repositioning its children's
                         // Note: position event for compound is not triggered in this case
