@@ -602,37 +602,47 @@
                         }
 
                         var nodePos = node.position();
+                        var newX = nodePos.x;
+                        var newY = nodePos.y;
+                        var isXresized = false;
+                        var isYresized = false;
 
                         if (location.startsWith("top")) {
                             if (node.height() - xHeight > options.minHeight(node)) {
-                                // this will trigger a position event, leading to useless redraw.
-                                // TODO find a way to avoid that
-                                node.position("y", nodePos.y + xHeight / 2);
+                                newY = nodePos.y + xHeight / 2;
+                                isYresized = true;
                                 options.setHeight(node, node.height() - xHeight);
                             } else if (isAspectedMode)
                                 return;
                         } else if (location.startsWith("bottom")) {
                             if (node.height() + xHeight > options.minHeight(node)) {
-                                // this will trigger a position event, leading to useless redraw.
-                                node.position("y", nodePos.y + xHeight / 2);
+                                newY = nodePos.y + xHeight / 2;
+                                isYresized = true;
                                 options.setHeight(node, node.height() + xHeight);
                             } else if (isAspectedMode)
                                 return;
                         }
 
-                        // other position event triggered below
                         if (location.endsWith("left") && node.width() - xWidth > options.minWidth(node)) {
-                            node.position("x", nodePos.x + xWidth / 2);
+                            newX = nodePos.x + xWidth / 2;
+                            isXresized = true;
                             options.setWidth(node, node.width() - xWidth);
                         } else if (location.endsWith("right") && node.width() + xWidth > options.minWidth(node)) {
-                            node.position("x", nodePos.x + xWidth / 2);
+                            newX = nodePos.x + xWidth / 2;
+                            isXresized = true;
                             options.setWidth(node, node.width() + xWidth);
+                        }
+
+                        // this will trigger a position event, leading to useless redraw.
+                        // TODO find a way to avoid that
+                        if(isXresized || isYresized) {
+                            node.position({x: newX, y: newY});
                         }
                     });
 
                     startPos.x = x;
                     startPos.y = y;
-                    self.resizeControls.update();
+                    self.resizeControls.update(); // redundant update if the position has changed just before
 
                     cy.trigger("noderesize.resizedrag", [location, node]);
                 };
