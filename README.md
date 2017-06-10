@@ -86,14 +86,15 @@ CommonJS:
 ```js
 var cytoscape = require('cytoscape');
 var nodeResize = require('cytoscape-node-resize');
+var konva = require('konva');
 
-nodeResize( cytoscape, jQuery, Konva ); // register extension
+nodeResize( cytoscape, jQuery, konva ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-node-resize', "jquery"], function( cytoscape, nodeResize, jQuery ){
-  nodeResize( cytoscape, jQuery ); // register extension
+require(['cytoscape', 'cytoscape-node-resize', 'jquery', 'konva'], function( cytoscape, nodeResize, jQuery, konva ){
+  nodeResize( cytoscape, jQuery, konva ); // register extension
 });
 ```
 
