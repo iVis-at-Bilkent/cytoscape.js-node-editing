@@ -69,7 +69,7 @@ Only consists of initilization & default options.
 
  * Cytoscape.js ^2.7.0
  * jquery ^1.7.0 || ^2.0.0 || ^3.0.0
- * oCanvas ^2.8.0 // It is not commonjs nor AMD compatible just include it in your html file
+ * konva ^1.6.3
  * cytoscape-undo-redo ^1.0.10 (optional)
 
 
@@ -87,7 +87,7 @@ CommonJS:
 var cytoscape = require('cytoscape');
 var nodeResize = require('cytoscape-node-resize');
 
-nodeResize( cytoscape, jQuery ); // register extension
+nodeResize( cytoscape, jQuery, Konva ); // register extension
 ```
 
 AMD:

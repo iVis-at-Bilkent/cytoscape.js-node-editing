@@ -22,6 +22,9 @@
     "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-resize/issues"
   },
   "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-resize",
+  "peerDependencies": {
+    "konva": "^1.6.3"
+  },
   "devDependencies": {
     "gulp": "^3.8.8",
     "gulp-jshint": "^1.8.5",
