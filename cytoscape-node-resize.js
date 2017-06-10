@@ -605,18 +605,22 @@
 
                         if (location.startsWith("top")) {
                             if (node.height() - xHeight > options.minHeight(node)) {
+                                // this will trigger a position event, leading to useless redraw.
+                                // TODO find a way to avoid that
                                 node.position("y", nodePos.y + xHeight / 2);
                                 options.setHeight(node, node.height() - xHeight);
                             } else if (isAspectedMode)
                                 return;
                         } else if (location.startsWith("bottom")) {
                             if (node.height() + xHeight > options.minHeight(node)) {
+                                // this will trigger a position event, leading to useless redraw.
                                 node.position("y", nodePos.y + xHeight / 2);
                                 options.setHeight(node, node.height() + xHeight);
                             } else if (isAspectedMode)
                                 return;
                         }
 
+                        // other position event triggered below
                         if (location.endsWith("left") && node.width() - xWidth > options.minWidth(node)) {
                             node.position("x", nodePos.x + xWidth / 2);
                             options.setWidth(node, node.width() - xWidth);
@@ -908,13 +912,16 @@
                 // listens for position event and refreshGrapples if necessary
                 cy.on("position", "node", ePositionNode = function(e) {
                     if(controls) {
+                        if(e.target.id() == controls.parent.id()) {
+                            controls.update();
+                        }
                         // if the position of compund changes by repositioning its children's
                         // Note: position event for compound is not triggered in this case
-                        if(currentPos.x != oldPos.x || currentPos.y != oldPos.y) {
+                        else if(currentPos.x != oldPos.x || currentPos.y != oldPos.y) {
                             currentPos = controls.parent.position();
+                            controls.update();
                             oldPos = {x : currentPos.x, y : currentPos.y};
                         }
-                        controls.update();
                     }
                 });
 
