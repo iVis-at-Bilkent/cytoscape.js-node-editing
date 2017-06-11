@@ -394,6 +394,7 @@
                 this.boundingRectangle.shape.destroy();
                 delete this.boundingRectangle;
                 for(var i=0; i < this.grapples.length; i++) {
+                    this.grapples[i].unbindAllEvents();
                     this.grapples[i].shape.destroy();
                 };
                 delete this.grapples;
@@ -676,6 +677,12 @@
                 this.updateShapePosition(startPos, width, height, gs);
             };
 
+            Grapple.prototype.unbindAllEvents = function () {
+                this.shape.off('mouseenter');
+                this.shape.off('mouseleave');
+                this.shape.off('touchstart mousedown');
+            };
+
             Grapple.prototype.updateShapePosition = function (startPos, width, height, gs) {
                 switch(this.location) {
                     case "topleft":
@@ -873,28 +880,26 @@
                     oldPos = {x: undefined, y: undefined};
                     currentPos = {x: 0, y: 0};
 
+                    if(controls) {
+                        controls.remove();
+                        controls = null;
+                    }
+
                     if(cy.nodes(':selected').size() == 1) {
                         controls = new ResizeControls(cy.nodes(':selected'));
-                    }
-                    else {
-                        if(controls) {
-                            controls.remove();
-                            controls = null;
-                        }
                     }
                 });
 
                 cy.on("select", "node", eSelectNode = function(e) {
                     var node = e.target;
 
+                    if(controls) {
+                        controls.remove();
+                        controls = null;
+                    }
+
                     if(cy.nodes(':selected').size() == 1) {
                         controls = new ResizeControls(node);
-                    }
-                    else {
-                        if(controls) {
-                            controls.remove();
-                            controls = null;
-                        }
                     }
                 });
 
