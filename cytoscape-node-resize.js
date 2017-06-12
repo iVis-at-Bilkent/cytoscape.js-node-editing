@@ -1012,6 +1012,9 @@
 
                 var resizeDo = function (arg) {
                     if (arg.firstTime) {
+                        if (controls) {
+                            controls.update(); // refresh grapplers after node resize
+                        }
                         delete arg.firstTime;
                         return arg;
                     }
