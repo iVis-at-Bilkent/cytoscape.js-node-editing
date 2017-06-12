@@ -992,17 +992,20 @@
                 });
 
                 cy.on("noderesize.moveend", function (e, nodes) {
-                    var initialPos = moveparam.firstNodePosition;
+                    if (moveparam != undefined)
+                    {
+                        var initialPos = moveparam.firstNodePosition;
 
-                    moveparam.positionDiff = {
-                        x: -nodes[0].position('x') + initialPos.x,
-                        y: -nodes[0].position('y') + initialPos.y
+                        moveparam.positionDiff = {
+                            x: -nodes[0].position('x') + initialPos.x,
+                            y: -nodes[0].position('y') + initialPos.y
+                        }
+
+                        delete moveparam.firstNodePosition;
+
+                        cy.undoRedo().do("noderesize.move", moveparam);
+                        moveparam = undefined;
                     }
-
-                    delete moveparam.firstNodePosition;
-
-                    cy.undoRedo().do("noderesize.move", moveparam);
-                    moveparam = undefined;
                 });
 
                 var resizeDo = function (arg) {
