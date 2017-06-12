@@ -885,8 +885,9 @@
                         controls = null;
                     }
 
-                    if(cy.nodes(':selected').size() == 1) {
-                        controls = new ResizeControls(cy.nodes(':selected'));
+                    var selectedNodes = cy.nodes(':selected');
+                    if(selectedNodes.size() == 1) {
+                        controls = new ResizeControls(selectedNodes);
                     }
                 });
 
@@ -898,8 +899,9 @@
                         controls = null;
                     }
 
-                    if(cy.nodes(':selected').size() == 1) {
-                        controls = new ResizeControls(node);
+                    var selectedNodes = cy.nodes(':selected');
+                    if(selectedNodes.size() == 1) {
+                        controls = new ResizeControls(selectedNodes);
                     }
                 });
 
@@ -916,10 +918,6 @@
                     var node = e.target;
                     // If a selected node is added we should regard this event just like a select event
                     if ( node.selected() ) {
-                        if(controls) {
-                            controls.remove();
-                            controls = null;
-                        }
                         eSelectNode(e);
                     }
                 });
@@ -927,12 +925,16 @@
                 // listens for position event and refreshGrapples if necessary
                 cy.on("position", "node", ePositionNode = function(e) {
                     if(controls) {
+                        // It seems that parent.position() doesn't always give consistent result.
+                        // But calling it here makes the results consistent, by updating it to the correct value, somehow.
+                        // Maybe there is some cache on cytoscape side preventing a position update.
+                        var trash_var = controls.parent.position(); // trash_var isn't used, this line apparently makes position() correct
                         if(e.target.id() == controls.parent.id()) {
                             controls.update();
                         }
                         // if the position of compund changes by repositioning its children's
                         // Note: position event for compound is not triggered in this case
-                        else if(currentPos.x != oldPos.x || currentPos.y != oldPos.y) {
+                        else if(e.target.isChild() && (currentPos.x != oldPos.x || currentPos.y != oldPos.y)) {
                             currentPos = controls.parent.position();
                             controls.update();
                             oldPos = {x : currentPos.x, y : currentPos.y};
