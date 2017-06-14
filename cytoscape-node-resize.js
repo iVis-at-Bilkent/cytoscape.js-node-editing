@@ -935,7 +935,7 @@
                         }
                         // if the position of compund changes by repositioning its children's
                         // Note: position event for compound is not triggered in this case
-                        else if(e.target.isChild() && (currentPos.x != oldPos.x || currentPos.y != oldPos.y)) {
+                        else if(currentPos.x != oldPos.x || currentPos.y != oldPos.y) {
                             currentPos = controls.parent.position();
                             controls.update();
                             oldPos = {x : currentPos.x, y : currentPos.y};
