@@ -958,6 +958,7 @@
                 cy.on("afterUndo afterRedo", eUndoRedo = function() {
                     if ( controls ) {
                         controls.update();
+                        oldPos = {x: undefined, y: undefined};
                     }
                 });
 
