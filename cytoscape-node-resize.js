@@ -306,7 +306,7 @@
             var controls;
 
             // Events to bind and unbind
-            var eUnselectNode, ePositionNode, eZoom, ePan, eSelectNode, eRemoveNode, eAddNode, eFreeNode;
+            var eUnselectNode, ePositionNode, eZoom, ePan, eSelectNode, eRemoveNode, eAddNode, eFreeNode, eUndoRedo;
 
             options = $.extend(true, options, opts);
 
@@ -869,6 +869,7 @@
                 cy.off("select", "node", eSelectNode);
                 cy.off("remove", "node", eRemoveNode);
                 cy.off("add", "node", eAddNode);
+                cy.off("afterUndo afterRedo", eUndoRedo);
             };
 
             var bindEvents = function() {
@@ -949,6 +950,12 @@
                 });
 
                 cy.on("pan", ePan = function() {
+                    if ( controls ) {
+                        controls.update();
+                    }
+                });
+
+                cy.on("afterUndo afterRedo", eUndoRedo = function() {
                     if ( controls ) {
                         controls.update();
                     }
