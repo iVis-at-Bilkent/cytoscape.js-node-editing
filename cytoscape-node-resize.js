@@ -982,14 +982,16 @@
                 });
 
                 cy.on("noderesize.movestart", function (e, nodes) {
-
-                    moveparam = {
-                        firstTime : true,
-                        firstNodePosition: {
-                            x: nodes[0].position('x'),
-                            y: nodes[0].position('y')
-                        },
-                        nodes: nodes
+                    if (nodes[0] != undefined)
+                    {
+                        moveparam = {
+                            firstTime: true,
+                            firstNodePosition: {
+                                x: nodes[0].position('x'),
+                                y: nodes[0].position('y')
+                            },
+                            nodes: nodes
+                        }
                     }
                 });
 
