@@ -269,6 +269,27 @@
                 return data ? data : 15;
             }, // a function returns min height of node
             
+            // Getters for some style properties the defaults returns ele.css('property-name')
+            // you are encouraged to override these getters
+            getCompoundMinWidth: function(node) { 
+              return node.css('min-width'); 
+            },
+            getCompoundMinHeight: function(node) { 
+              return node.css('min-height'); 
+            },
+            getCompoundMinWidthBiasRight: function(node) {
+              return node.css('min-width-bias-right');
+            },
+            getCompoundMinWidthBiasLeft: function(node) { 
+              return node.css('min-width-bias-left');
+            },
+            getCompoundMinHeightBiasTop: function(node) {
+              return node.css('min-height-bias-top');
+            },
+            getCompoundMinHeightBiasBottom: function(node) { 
+              return node.css('min-height-bias-bottom');
+            },
+            
             // These optional function will be executed to set the width/height of a node in this extension
             // Using node.css() is not a recommended way (http://js.cytoscape.org/#eles.style) to do this. Therefore, overriding these defaults
             // so that a data field or something like that will be used to set node dimentions instead of directly calling node.css() 
@@ -278,6 +299,24 @@
             },
             setHeight: function(node, height) {
                 node.css('height', height);
+            },
+            setCompoundMinWidth: function(node, minWidth) { 
+              node.css('min-width', minWidth); 
+            },
+            setCompoundMinHeight: function(node, minHeight) { 
+              node.css('min-height', minHeight); 
+            },
+            setCompoundMinWidthBiasLeft: function(node, minWidthBiasLeft) { 
+              node.css('min-width-bias-left', minWidthBiasLeft); 
+            },
+            setCompoundMinWidthBiasRight: function(node, minHeightBiasRight) {
+              node.css('min-width-bias-right', minHeightBiasRight); 
+            },
+            setCompoundMinHeightBiasTop: function(node, minHeightBiasTop) { 
+              node.css('min-height-bias-top', minHeightBiasTop); 
+            },
+            setCompoundMinHeightBiasBottom: function(node, minHeightBiasBottom) {
+              node.css('min-height-bias-bottom', minHeightBiasBottom); 
             },
             
             isFixedAspectRatioResizeMode: function (node) { return node.is(".fixedAspectRatioResizeMode") },// with only 4 active grapples (at corners)
@@ -297,8 +336,16 @@
                 w: "w-resize"
             }
         };
+        
+        var api; // The extension api to be exposed 
 
         cytoscape('core', 'nodeResize', function (opts) {
+            
+            // If options parameter is 'get' string then just return the api
+            if (opts === 'get') {
+              return api;
+            }
+            
             var cy = this;
 
             // the controls object represents the grapples and bounding rectangle
@@ -518,8 +565,13 @@
 
             Grapple.prototype.bindActiveEvents = function () {
                 var self = this; // keep reference to the grapple object inside events
+                var node = self.parent;
+                var setWidthFcn, setHeightFcn; // Functions to resize the node
+                var getWidthFcn,getHeightFcn; // Functions to get node sizes
                 var startPos = {};
                 var tmpActiveBgOpacity;
+                // BBox of children of a node. Of course is valid if the node is a compound.
+                var childrenBBox; 
 
                 // helper object
                 var translateLocation = {
@@ -534,6 +586,28 @@
                 };
 
                 var eMouseDown = function (event) {
+                    childrenBBox = node.children().boundingBox();
+                    // If the node is a compound use setCompoundMinWidth() and setCompoundMinHeight() 
+                    // instead of setWidth() and setHeight() 
+                    setWidthFcn = node.isParent() ? options.setCompoundMinWidth : options.setWidth; 
+                    setHeightFcn = node.isParent() ? options.setCompoundMinHeight : options.setHeight; 
+                    
+                    getWidthFcn = function(node) {
+                      if (node.isParent()) {
+                        return Math.max(parseFloat(options.getCompoundMinWidth(node)), childrenBBox.w);
+                      }
+                      
+                      return node.width();
+                    };
+                    
+                    getHeightFcn = function(node) {
+                      if (node.isParent()) {
+                        return Math.max(parseFloat(options.getCompoundMinHeight(node)), childrenBBox.h);
+                      }
+                      
+                      return node.height();
+                    };
+                    
                     cy.trigger("noderesize.resizestart", [self.location, self.parent]);
                     tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
                     cy.style()
@@ -582,7 +656,6 @@
                     var xHeight = (y - startPos.y) / cy.zoom();
                     var xWidth = (x - startPos.x) / cy.zoom();
 
-                    var node = self.parent;
                     var location = self.location;
                     cy.batch(function () {
                         var isAspectedMode = options.isFixedAspectRatioResizeMode(node);
@@ -591,7 +664,7 @@
                             return;
 
                         if (isAspectedMode) {
-                            var aspectRatio = node.height() / node.width();
+                            var aspectRatio = getHeightFcn(node) / getWidthFcn(node);
 
                             var aspectedSize = Math.min(xWidth, xHeight);
 
@@ -608,36 +681,125 @@
                         var isXresized = false;
                         var isYresized = false;
 
+                        // These are valid if the node is a compound
+                        // Initial (before resize) sizes of compound 
+                        var initialWidth, initialHeight;
+                        // Extra space between node width and children bbox. Causes by 'min-width' and/or 'min-height'
+                        var extraLeft = 0, extraRight = 0, extraTop = 0, extraBottom = 0; 
+                        
+                        if (node.isParent()) {
+                          var totalExtraWidth = getWidthFcn(node) - childrenBBox.w; 
+                          var totalExtraHeight = getHeightFcn(node) - childrenBBox.h; 
+                          
+                          if (totalExtraWidth > 0) {
+                            extraLeft = totalExtraWidth * parseFloat(options.getCompoundMinWidthBiasLeft(node)) / 
+                                  ( parseFloat(options.getCompoundMinWidthBiasLeft(node)) + parseFloat(options.getCompoundMinWidthBiasRight(node)) ); 
+                            extraRight = totalExtraWidth - extraLeft;
+                          }
+                          
+                          if (totalExtraHeight > 0) {
+                            extraTop = totalExtraHeight * parseFloat(options.getCompoundMinHeightBiasTop(node)) / 
+                                  ( parseFloat(options.getCompoundMinHeightBiasTop(node)) + parseFloat(options.getCompoundMinHeightBiasBottom(node)) ); 
+                            extraBottom = totalExtraHeight - extraTop;
+                          }
+                        }
+
                         if (location.startsWith("top")) {
-                            if (node.height() - xHeight > options.minHeight(node)) {
+                            // Note that xHeight is supposed to be negative
+                            // If the node is simple min height should not be exceed, else if it is compound
+                            // then extraTop should not be negative
+                            if (getHeightFcn(node) - xHeight > options.minHeight(node)
+                                    && ( !node.isParent() || extraTop - xHeight >= 0 ) ) {
                                 newY = nodePos.y + xHeight / 2;
                                 isYresized = true;
-                                options.setHeight(node, node.height() - xHeight);
+                                setHeightFcn(node, getHeightFcn(node) - xHeight);
                             } else if (isAspectedMode)
                                 return;
                         } else if (location.startsWith("bottom")) {
-                            if (node.height() + xHeight > options.minHeight(node)) {
+                            // Note that xHeight is supposed to be positive
+                            // If the node is simple min height should not be exceed, else if it is compound
+                            // then extraBottom should not be negative
+                            if (getHeightFcn(node) + xHeight > options.minHeight(node)
+                                    && ( !node.isParent() || extraBottom + xHeight >= 0 ) ) {
                                 newY = nodePos.y + xHeight / 2;
                                 isYresized = true;
-                                options.setHeight(node, node.height() + xHeight);
+                                setHeightFcn(node, getHeightFcn(node) + xHeight);
                             } else if (isAspectedMode)
                                 return;
                         }
 
-                        if (location.endsWith("left") && node.width() - xWidth > options.minWidth(node)) {
+                        if (location.endsWith("left") && getWidthFcn(node) - xWidth > options.minWidth(node)
+                                && ( !node.isParent() || extraLeft - xWidth >= 0 ) ) {
+                            // Note that xWidth is supposed to be negative
+                            // If the node is simple min width should not be exceed, else if it is compound
+                            // then extraLeft should not be negative
                             newX = nodePos.x + xWidth / 2;
                             isXresized = true;
-                            options.setWidth(node, node.width() - xWidth);
-                        } else if (location.endsWith("right") && node.width() + xWidth > options.minWidth(node)) {
+                            setWidthFcn(node, getWidthFcn(node) - xWidth);
+                        } else if (location.endsWith("right") && getWidthFcn(node) + xWidth > options.minWidth(node)
+                                && ( !node.isParent() || extraRight + xWidth >= 0 ) ) {
+                            // Note that xWidth is supposed to be positive
+                            // If the node is simple min width should not be exceed, else if it is compound
+                            // then extraRight should not be negative
                             newX = nodePos.x + xWidth / 2;
                             isXresized = true;
-                            options.setWidth(node, node.width() + xWidth);
+                            setWidthFcn(node, getWidthFcn(node) + xWidth);
                         }
 
                         // this will trigger a position event, leading to useless redraw.
                         // TODO find a way to avoid that
-                        if(isXresized || isYresized) {
+                        if(!node.isParent() && ( isXresized || isYresized )) {
                             node.position({x: newX, y: newY});
+                        }
+                        
+                        // If the node is a compound we need to handle left/right/top/bottom biases conditionally 
+                        if ( node.isParent() ) {
+                          var totalExtraWidth = getWidthFcn(node) - childrenBBox.w; 
+                          var totalExtraHeight = getHeightFcn(node) - childrenBBox.h;
+                          
+                          if (isXresized && totalExtraWidth > 0) {
+                            // If the location ends with right the left extra space should be fixed
+                            // else if it ends with left the right extra space should be fixed
+                            if (location.endsWith('right')) {
+                              extraRight = totalExtraWidth - extraLeft;
+                            }
+                            else if (location.endsWith('left')) {
+                              extraLeft = totalExtraWidth - extraRight;
+                            }
+
+                            var biasLeft = extraLeft / (extraLeft + extraRight) * 100;
+                            var biasRight = 100 - biasLeft;
+                            
+                            if (biasLeft < 0 || biasRight < 0) {
+//                              console.log('negative horizontal');
+                              return;
+                            }
+                            
+                            options.setCompoundMinWidthBiasLeft(node, biasLeft + '%');
+                            options.setCompoundMinWidthBiasRight(node, biasRight + '%');
+                          }
+                          
+                          if (isYresized && totalExtraHeight > 0) {
+                            // If the location starts with top the bottom extra space should be fixed
+                            // else if it starst with bottom the top extra space should be fixed
+                            if (location.startsWith('top')) {
+                              extraTop = totalExtraHeight - extraBottom;
+                            }
+                            else if (location.startsWith('bottom')) {
+                              extraBottom = totalExtraHeight - extraTop;
+                            }
+
+                            var biasTop = extraTop / (extraTop + extraBottom) * 100;
+                            var biasBottom = 100 - biasTop;
+                            
+                            if (biasTop < 0 || biasBottom < 0) {
+//                              console.log('negative vertical');
+                              return;
+                            }
+                            
+                            options.setCompoundMinHeightBiasTop(node, biasTop + '%');
+                            options.setCompoundMinHeightBiasBottom(node, biasBottom + '%');
+                          }
                         }
                     });
 
@@ -971,18 +1133,32 @@
 
                 var param;
                 var moveparam;
-
+                
+                // On resize start fill param object to use it on undo/redo
                 cy.on("noderesize.resizestart", function (e, type, node) {
                     param = {
                         node: node,
                         css: {
-                            width: node.width(),
-                            height: node.height()
-                        },
-                        position: $.extend({}, node.position())
+                        }
                     };
+                    
+                    // Some parts of param object are dependant on whether the node is a compound or simple node
+                    if (node.isParent()) {
+                      param.css.minWidth = parseFloat(options.getCompoundMinWidth(node));
+                      param.css.minHeight = parseFloat(options.getCompoundMinHeight(node));
+                      param.css.biasLeft = options.getCompoundMinWidthBiasLeft(node);
+                      param.css.biasRight = options.getCompoundMinWidthBiasRight(node);
+                      param.css.biasTop = options.getCompoundMinHeightBiasTop(node);
+                      param.css.biasBottom = options.getCompoundMinHeightBiasBottom(node);
+                    }
+                    else {
+                      param.css.width = node.width();
+                      param.css.height = node.height();
+                      param.position = $.extend({}, node.position());
+                    }
                 });
-
+                
+                // On resize end do the action using param object
                 cy.on("noderesize.resizeend", function (e, type, node) {
                     param.firstTime = true;
                     cy.undoRedo().do("resize", param);
@@ -1021,6 +1197,8 @@
                 });
 
                 var resizeDo = function (arg) {
+                    // If this is the first time it means that resize is already performed through user interaction.
+                    // In this case just removing the first time parameter is enough.
                     if (arg.firstTime) {
                         if (controls) {
                             controls.update(); // refresh grapplers after node resize
@@ -1030,19 +1208,47 @@
                     }
 
                     var node = arg.node;
-
+                    
+                    // Result object is to be returned for undo/redo cases
                     var result = {
                         node: node,
                         css: {
-                            width: node.width(),
-                            height: node.height()
-                        },
-                        position: $.extend({}, node.position())
+                        }
                     };
-
-                    node.position(arg.position);
-                    options.setWidth(node, arg.css.width);
-                    options.setHeight(node, arg.css.height);
+                    
+                    // Some parts of result object is dependent on whether the node is simple or compound
+                    if (node.isParent()) {
+                      result.css.minWidth = parseFloat(options.getCompoundMinWidth(node));
+                      result.css.minHeight = parseFloat(options.getCompoundMinHeight(node));
+                      result.css.biasLeft = options.getCompoundMinWidthBiasLeft(node);
+                      result.css.biasRight = options.getCompoundMinWidthBiasRight(node);
+                      result.css.biasTop = options.getCompoundMinHeightBiasTop(node);
+                      result.css.biasBottom = options.getCompoundMinHeightBiasBottom(node);
+                    }
+                    else {
+                      result.css.width = node.width();
+                      result.css.height = node.height();
+                      result.position = $.extend({}, node.position());
+                    }
+                    
+                    // Perform actual undo/redo part using args object
+                    cy.startBatch();
+                    
+                    if (node.isParent()) {
+                      options.setCompoundMinWidth(node, arg.css.minWidth);
+                      options.setCompoundMinHeight(node, arg.css.minHeight);
+                      options.setCompoundMinWidthBiasLeft(node, arg.css.biasLeft);
+                      options.setCompoundMinWidthBiasRight(node, arg.css.biasRight);
+                      options.setCompoundMinHeightBiasTop(node, arg.css.biasTop);
+                      options.setCompoundMinHeightBiasBottom(node, arg.css.biasBottom);
+                    }
+                    else {
+                      node.position(arg.position);
+                      options.setWidth(node, arg.css.width);
+                      options.setHeight(node, arg.css.height);
+                    }
+                    
+                    cy.endBatch();
 
                     if (controls) {
                         controls.update(); // refresh grapplers after node resize
@@ -1079,8 +1285,17 @@
                 cy.undoRedo().action("noderesize.move", moveDo, moveDo);
             }
 
-
-            return this; // chainability
+            api = {}
+            api.refreshGrapples = function() {
+              if (controls) {
+                // We need to remove old controls and create a new one rather then just updating controls
+                // We need this because the parent may change status and become resizable or not-resizable
+                var parent = controls.parent;
+                controls.remove();
+                controls = new ResizeControls(parent);
+              }
+            }
+            return api; // Return the api
         });
 
     };

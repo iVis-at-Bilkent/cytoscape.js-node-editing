@@ -7,9 +7,7 @@ A Cytoscape.js extension to provide grapples to resize nodes, distributed under 
 
 ![Image of extension](img.png)
 
-## API
-
-Only consists of initilization & default options.
+## Default Options
 
 ```js
             cy.nodeResize({
@@ -33,6 +31,27 @@ Only consists of initilization & default options.
                     var data = node.data("resizeMinHeight");
                     return data ? data : 15;
                 }, // a function returns min height of node
+
+                // Getters for some style properties the defaults returns ele.css('property-name')
+                // you are encouraged to override these getters
+                getCompoundMinWidth: function(node) { 
+                  return node.css('min-width'); 
+                },
+                getCompoundMinHeight: function(node) { 
+                  return node.css('min-height'); 
+                },
+                getCompoundMinWidthBiasRight: function(node) {
+                  return node.css('min-width-bias-right');
+                },
+                getCompoundMinWidthBiasLeft: function(node) { 
+                  return node.css('min-width-bias-left');
+                },
+                getCompoundMinHeightBiasTop: function(node) {
+                  return node.css('min-height-bias-top');
+                },
+                getCompoundMinHeightBiasBottom: function(node) { 
+                  return node.css('min-height-bias-bottom');
+                },
 
                 // These optional function will be executed to set the width/height of a node in this extension
                 // Using node.css() is not a recommended way (http://js.cytoscape.org/#eles.style) to do this. Therefore, overriding these defaults
@@ -63,6 +82,14 @@ Only consists of initilization & default options.
                 }
              });
 ```
+
+## API
+
+  `var api = cy.nodeResize('get')`
+   To get the extension instance after initialization.
+
+  `api.refreshGrapples()`
+   Refresh rendered node grapples if any. It is an expensive operation and is supposed to be called in rare cases (When it is really needed).
 
 
 ## Dependencies
