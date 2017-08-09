@@ -1295,6 +1295,13 @@
                 controls = new ResizeControls(parent);
               }
             }
+            // Simply remove grapples even if node is selected
+            api.removeGrapples = function() {
+              if (controls) {
+                controls.remove();
+                controls = null;
+              }
+            }
             return api; // Return the api
         });
 

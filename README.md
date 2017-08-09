@@ -91,6 +91,9 @@ A Cytoscape.js extension to provide grapples to resize nodes, distributed under 
   `api.refreshGrapples()`
    Refresh rendered node grapples if any. It is an expensive operation and is supposed to be called in rare cases (When it is really needed).
 
+  `api.removeGrapples()`
+   Remove grapples while node is selected. This is useful when a node is selected but no need to show grapples. 
+
 
 ## Dependencies
 
