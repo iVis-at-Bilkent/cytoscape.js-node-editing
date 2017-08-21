@@ -7,9 +7,11 @@ A Cytoscape.js extension to provide grapples to resize nodes, distributed under 
 
 ![Image of extension](img.png)
 
-## API
+## Demo
 
-Only consists of initilization & default options.
+Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/master/demo.html) (simple) or [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/master/undoable_demo.html) (undoable) for demos
+
+## Default Options
 
 ```js
             cy.nodeResize({
@@ -33,6 +35,38 @@ Only consists of initilization & default options.
                     var data = node.data("resizeMinHeight");
                     return data ? data : 15;
                 }, // a function returns min height of node
+
+                // Getters for some style properties the defaults returns ele.css('property-name')
+                // you are encouraged to override these getters
+                getCompoundMinWidth: function(node) { 
+                  return node.css('min-width'); 
+                },
+                getCompoundMinHeight: function(node) { 
+                  return node.css('min-height'); 
+                },
+                getCompoundMinWidthBiasRight: function(node) {
+                  return node.css('min-width-bias-right');
+                },
+                getCompoundMinWidthBiasLeft: function(node) { 
+                  return node.css('min-width-bias-left');
+                },
+                getCompoundMinHeightBiasTop: function(node) {
+                  return node.css('min-height-bias-top');
+                },
+                getCompoundMinHeightBiasBottom: function(node) { 
+                  return node.css('min-height-bias-bottom');
+                },
+
+                // These optional function will be executed to set the width/height of a node in this extension
+                // Using node.css() is not a recommended way (http://js.cytoscape.org/#eles.style) to do this. Therefore, overriding these defaults
+                // so that a data field or something like that will be used to set node dimentions instead of directly calling node.css() 
+                // is highly recommended (Of course this will require a proper setting in the stylesheet).
+                setWidth: function(node, width) { 
+                    node.css('width', width);
+                },
+                setHeight: function(node, height) {
+                    node.css('height', height);
+                },
     
                 isFixedAspectRatioResizeMode: function (node) { return node.is(".fixedAspectRatioResizeMode") },// with only 4 active grapples (at corners)
                 isNoResizeMode: function (node) { return node.is(".noResizeMode, :parent") }, // no active grapples
@@ -53,12 +87,23 @@ Only consists of initilization & default options.
              });
 ```
 
+## API
+
+  `var api = cy.nodeResize('get')`
+   To get the extension instance after initialization.
+
+  `api.refreshGrapples()`
+   Refresh rendered node grapples if any. It is an expensive operation and is supposed to be called in rare cases (When it is really needed).
+
+  `api.removeGrapples()`
+   Remove grapples while node is selected. This is useful when a node is selected but no need to show grapples. 
+
 
 ## Dependencies
 
  * Cytoscape.js ^2.7.0
  * jquery ^1.7.0 || ^2.0.0 || ^3.0.0
- * oCanvas ^2.8.0 // It is not commonjs nor AMD compatible just include it in your html file
+ * konva ^1.6.3
  * cytoscape-undo-redo ^1.0.10 (optional)
 
 
@@ -75,14 +120,15 @@ CommonJS:
 ```js
 var cytoscape = require('cytoscape');
 var nodeResize = require('cytoscape-node-resize');
+var konva = require('konva');
 
-nodeResize( cytoscape, jQuery ); // register extension
+nodeResize( cytoscape, jQuery, konva ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-node-resize', "jquery"], function( cytoscape, nodeResize, jQuery ){
-  nodeResize( cytoscape, jQuery ); // register extension
+require(['cytoscape', 'cytoscape-node-resize', 'jquery', 'konva'], function( cytoscape, nodeResize, jQuery, konva ){
+  nodeResize( cytoscape, jQuery, konva ); // register extension
 });
 ```
 
