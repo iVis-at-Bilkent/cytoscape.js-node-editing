@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-resize",
   "peerDependencies": {
+    "cytoscape": "^3.0.0",
     "konva": "^1.6.3"
   },
   "devDependencies": {
