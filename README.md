@@ -7,6 +7,10 @@ A Cytoscape.js extension to provide grapples to resize nodes, distributed under 
 
 ![Image of extension](img.png)
 
+## Demo
+
+Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/master/demo.html) for demo
+
 ## Default Options
 
 ```js
