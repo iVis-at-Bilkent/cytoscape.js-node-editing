@@ -70,7 +70,7 @@ Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/master/
     
                 isFixedAspectRatioResizeMode: function (node) { return node.is(".fixedAspectRatioResizeMode") },// with only 4 active grapples (at corners)
                 isNoResizeMode: function (node) { return node.is(".noResizeMode, :parent") }, // no active grapples
-                isNoControlsMode: function (node) { return node.is(".noControlsMode, :parent") }, // no controls - do not draw grapples
+                isNoControlsMode: function (node) { return node.is(".noControlsMode") }, // no controls - do not draw grapples
     
                 cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
                     // May take any "cursor" css property
