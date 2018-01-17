@@ -30,6 +30,7 @@ build/Release
 
 # Dependency directories
 node_modules
+nbproject/*
 jspm_packages
 
 # Optional npm cache directory

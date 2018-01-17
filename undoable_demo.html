@@ -10,6 +10,7 @@
 		<script src="https://code.jquery.com/jquery-3.1.0.slim.min.js"></script>
 		<script src="https://cdn.rawgit.com/konvajs/konva/1.6.3/konva.min.js"></script>
 		<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+		<script src="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-undo-redo/master/cytoscape-undo-redo.js"></script>
 
 		<!-- for testing with local version of cytoscape.js -->
 		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
@@ -70,9 +71,10 @@
 					elements: {
 						nodes: [
 							{ data: { id: 'j', name: 'Aspected Resize' }, classes: "fixedAspectRatioResizeMode" },
-							{ data: { id: 'e', name: 'Full Resize' } },
+							{ data: { id: 'e', name: 'Full Resize', parent: 'c'} },
 							{ data: { id: 'g', name: 'Multi Node Resize (Full)' } },
-							{ data: { id: 'k', name: 'No Resize' }, classes: "noResizeMode" }
+							{ data: { id: 'k', name: 'No Resize' }, classes: "noResizeMode" },
+							{ data: { id: 'c', name: 'Full Resize' } }
 						],
 						edges: [
 							{ data: { source: 'j', target: 'e' } },
@@ -88,7 +90,9 @@
 					}
 				});
 
-				cy.nodeResize();
+				cy.nodeResize({
+					undoable: true,
+				  });
 
 				cy.on("noderesize.resizestart", function (e, type) {
 					console.log(type);
@@ -97,7 +101,16 @@
 				cy.on("noderesize.resizeend", function (e, type) {
 					document.body.style.cursor = 'initial';
 				});
-
+				document.addEventListener('keydown', function (e){
+					if (e.ctrlKey && e.which == '90') {
+						cy.undoRedo().undo();	     
+					}
+					else if (e.ctrlKey && e.which == '89') {
+						cy.undoRedo().redo();     
+					}
+				}, true );
+				
+				
 			});
 		</script>
 	</head>

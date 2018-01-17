@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-node-resize",
-  "version": "1.0.10",
+  "version": "3.1.0",
   "description": "",
   "main": "cytoscape-node-resize.js",
   "spm": {
@@ -22,6 +22,10 @@
     "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-resize/issues"
   },
   "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-resize",
+  "peerDependencies": {
+    "cytoscape": "^3.0.0",
+    "konva": "^1.6.3"
+  },
   "devDependencies": {
     "gulp": "^3.8.8",
     "gulp-jshint": "^1.8.5",
