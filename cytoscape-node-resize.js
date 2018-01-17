@@ -327,6 +327,7 @@
 
               isFixedAspectRatioResizeMode: function (node) { return node.is(".fixedAspectRatioResizeMode") },// with only 4 active grapples (at corners)
               isNoResizeMode: function (node) { return node.is(".noResizeMode, :parent") }, // no active grapples
+	      isNoControlsMode: function (node) { return node.is(".noControlsMode, :parent") }, // no controls
 
               cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
                   // May take any "cursor" css property
@@ -1103,7 +1104,9 @@
 
                     var selectedNodes = cy.nodes(':selected');
                     if(selectedNodes.size() == 1) {
-                        controls = new ResizeControls(selectedNodes);
+			if (!options.isNoControlsMode(node)) {
+			    controls = new ResizeControls(selectedNodes);
+			}   
                     }
                 });
 
