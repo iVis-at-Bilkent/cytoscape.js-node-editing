@@ -943,10 +943,17 @@
 
                 nodesToMove.positions(function(node, i) {
                     if(typeof node === "number") {
-                      node = i;
+                        node = i;
                     }
                     var oldX = node.position("x");
                     var oldY = node.position("y");
+                    if (node.isParent())
+                    {
+                        return {
+                            x: oldX,
+                            y: oldY
+                        };
+                    }
                     return {
                         x: oldX + positionDiff.x,
                         y: oldY + positionDiff.y
