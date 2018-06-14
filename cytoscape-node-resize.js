@@ -563,7 +563,8 @@
                 };
 
                 var eMouseLeave = function (event) {
-                    event.target.getStage().container().style.cursor = options.cursors.default;
+                    if (event.target.getStage() != undefined)
+                        event.target.getStage().container().style.cursor = options.cursors.default;
                 };
 
                 var eMouseDown = function (event) {
@@ -839,7 +840,8 @@
                 };
 
                 var eMouseLeave = function (event) {
-                    event.target.getStage().container().style.cursor = options.cursors.default;
+                    if (event.target.getStage() != undefined)
+                        event.target.getStage().container().style.cursor = options.cursors.default;
                 };
 
                 this.shape.on("mouseenter", eMouseEnter);
