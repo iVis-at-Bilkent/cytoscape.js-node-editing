@@ -564,7 +564,8 @@
                 };
 
                 var eMouseLeave = function (event) {
-                    event.target.getStage().container().style.cursor = options.cursors.default;
+                    if (event.target.getStage() != undefined)
+                        event.target.getStage().container().style.cursor = options.cursors.default;
                 };
 
                 var eMouseDown = function (event) {
@@ -840,7 +841,8 @@
                 };
 
                 var eMouseLeave = function (event) {
-                    event.target.getStage().container().style.cursor = options.cursors.default;
+                    if (event.target.getStage() != undefined)
+                        event.target.getStage().container().style.cursor = options.cursors.default;
                 };
 
                 this.shape.on("mouseenter", eMouseEnter);
@@ -944,10 +946,17 @@
 
                 nodesToMove.positions(function(node, i) {
                     if(typeof node === "number") {
-                      node = i;
+                        node = i;
                     }
                     var oldX = node.position("x");
                     var oldY = node.position("y");
+                    if (node.isParent())
+                    {
+                        return {
+                            x: oldX,
+                            y: oldY
+                        };
+                    }
                     return {
                         x: oldX + positionDiff.x,
                         y: oldY + positionDiff.y
