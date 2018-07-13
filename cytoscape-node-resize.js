@@ -996,35 +996,14 @@
                     if(typeof options.resizeToContentFunction === "function"){
                         options.resizeToContentFunction([node]);
                     }
+                    else if(cy.undoRedo && options.undoable)
+                        cy.trigger('noderesize.resizetocontent', [self]);
                     else{
-                        defaultResizeToContent(node);
-                    }
-                }
-
-                // Resize node according to label
-                var defaultResizeToContent = function(node) {
-                    var context = document.createElement('canvas').getContext("2d");
-                    var style = node.style();
-                    context.font = style['font-size'] + " " + style['font-family'];
-
-                    var labelText = (style['label']).split("\n");
-
-                    var minWidth = 0;
-                    var minHeight = Math.max(context.measureText('M').width, 50);
-                    labelText.forEach(function(text){
-                        var textWidth = context.measureText(text).width;
-                        if (minWidth < textWidth)
-                            minWidth = textWidth;
-                    });
-
-                    if(minWidth !== 0){
-                        var bbox = node.data("bbox");
-                        bbox.w = minWidth * 1.1;
-                        bbox.h = minHeight * 1.1;
-                        node.data("bbox", bbox);
-
-                        cy.style().update();
-                        self.resizeControls.update();
+                        var params = {
+                            self: self,
+                            firstTime: true
+                        }
+                        defaultResizeToContent(params);                    
                     }
                 }
 
@@ -1052,6 +1031,60 @@
             var getPadding = function () {
                 return options.padding*Math.max(1, cy.zoom());
             };
+
+            var defaultResizeToContent = function(params) {
+                var self = params.self;
+                var node = self.parent;
+                
+                var setWidthFcn = node.isParent() ? options.setCompoundMinWidth : options.setWidth; 
+                var setHeightFcn = node.isParent() ? options.setCompoundMinHeight : options.setHeight; 
+                
+                if(params.firstTime){
+                    delete params.firstTime;
+                    
+                    params.oldWidth = node.width();
+                    params.oldHeight = node.height();
+
+                    var context = document.createElement('canvas').getContext("2d");
+                    var style = node.style();
+                    context.font = style['font-size'] + " " + style['font-family'];
+    
+                    var labelText = (style['label']).split("\n");
+    
+                    var minWidth = 0;
+                    var minHeight = Math.max(context.measureText('M').width, 50);
+                    labelText.forEach(function(text){
+                        var textWidth = context.measureText(text).width;
+                        if (minWidth < textWidth)
+                            minWidth = textWidth;
+                    });
+    
+                    if(minWidth !== 0){
+                        setWidthFcn(node, minWidth * 1.1);
+                        setHeightFcn(node, minHeight * 1.1);
+    
+                        cy.style().update();
+                        self.resizeControls.update();
+                    }
+
+                    return params;
+                }
+                else{  
+                    var newWidth = params.oldWidth;
+                    var newHeight = params.oldHeight;
+                    
+                    params.oldWidth = node.width();
+                    params.oldHeight = node.height();
+
+                    setWidthFcn(node, newWidth);
+                    setHeightFcn(node, newHeight);
+    
+                    cy.style().update();
+
+                    return params;
+                }
+                
+            }
 
             function getTopMostNodes(nodes) {
                 var nodesMap = {};
@@ -1381,6 +1414,15 @@
                     }
                 });
 
+                cy.on("noderesize.resizetocontent", function (e, self) {
+                    var params = {
+                        self: self,
+                        firstTime: true
+                    }
+
+                    cy.undoRedo().do("resizeToContent", params); 
+                });
+
                 var resizeDo = function (arg) {
                     // If this is the first time it means that resize is already performed through user interaction.
                     // In this case just removing the first time parameter is enough.
@@ -1468,6 +1510,7 @@
 
                 cy.undoRedo().action("resize", resizeDo, resizeDo);
                 cy.undoRedo().action("noderesize.move", moveDo, moveDo);
+                cy.undoRedo().action("resizeToContent", defaultResizeToContent, defaultResizeToContent);
             }
 
             var api = {}; // The extension api to be exposed
