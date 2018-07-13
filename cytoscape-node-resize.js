@@ -999,8 +999,6 @@
                     else{
                         defaultResizeToContent(node);
                     }
-                    cy.style().update();
-                    self.resizeControls.update();
                 }
 
                 // Resize node according to label
@@ -1024,6 +1022,9 @@
                         bbox.w = minWidth * 1.1;
                         bbox.h = minHeight * 1.1;
                         node.data("bbox", bbox);
+
+                        cy.style().update();
+                        self.resizeControls.update();
                     }
                 }
 
