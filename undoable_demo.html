@@ -92,7 +92,8 @@
 
 				cy.nodeResize({
 					undoable: true,
-				  });
+					resizeToContentCueImage: 'resizeCue.svg'
+				});
 
 				cy.on("noderesize.resizestart", function (e, type) {
 					console.log(type);
