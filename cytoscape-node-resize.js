@@ -340,7 +340,12 @@
                   s: "s-resize",
                   sw: "sw-resize",
                   w: "w-resize"
-              }
+              },
+
+              resizeToContentCueEnabled: true,
+              resizeToContentFunction: undefined,
+              resizeToContentCuePosition: 'bottom-right',
+              resizeToContentCueImage: '/node_modules/cytoscape-node-resize/resizeCue.svg',
           };
         }
 
@@ -450,6 +455,7 @@
                     }
                     this.grapples.push(new Grapple(node, this, location, isActive))
                 };
+                this.resizeCue = new ResizeCue(node, this);
                 canvas.draw();
             };
 
@@ -458,6 +464,7 @@
                 for(var i=0; i < this.grapples.length; i++) {
                     this.grapples[i].update();
                 };
+                this.resizeCue.update();
                 canvas.draw();
             };
 
@@ -469,6 +476,9 @@
                     this.grapples[i].shape.destroy();
                 };
                 delete this.grapples;
+                this.resizeCue.unbindEvents();
+                this.resizeCue.shape.destroy();
+                delete this.resizeCue;
                 canvas.draw();
             };
 
@@ -908,8 +918,134 @@
                 }
             };
 
+            var ResizeCue = function (node, resizeControls) {
+                this.parent = node;
+                this.resizeControls = resizeControls;
+
+                var nodePos = node.renderedPosition();
+                var width = node.renderedOuterWidth() + getPadding();
+                var height = node.renderedOuterHeight() + getPadding();
+                var startPos = {
+                    x: nodePos.x - width / 2,
+                    y: nodePos.y - height / 2
+                };
+                
+                var ch = getResizeCueHeight(node);
+                var cw = getResizeCueWidth(node);
+                
+                var imageObj = new Image();
+                imageObj.src = options.resizeToContentCueImage;
+                this.shape = new Konva.Image({
+                    width: cw,
+                    height: ch,
+                    image: imageObj
+                });
+                
+                imageObj.onload = function() {
+                    canvas.draw();
+                }
+
+                this.updateShapePosition(startPos, width, height, cw, ch);
+                this.bindEvents();
+                canvas.add(this.shape);
+            }
+
+            ResizeCue.prototype.update = function() {
+                var nodePos = this.parent.renderedPosition();
+                var width = this.parent.renderedOuterWidth() + getPadding();
+                var height = this.parent.renderedOuterHeight() + getPadding();
+                var startPos = {
+                    x: nodePos.x - width / 2,
+                    y: nodePos.y - height / 2
+                };
+
+                var ch = getResizeCueHeight(this.parent);
+                var cw = getResizeCueWidth(this.parent);
+
+                this.shape.width(cw);
+                this.shape.height(ch);
+                this.updateShapePosition(startPos, width, height, cw, ch);
+            };
+
+            ResizeCue.prototype.updateShapePosition = function (startPos, width, height, cw, ch) {
+                switch(options.resizeToContentCuePosition) {
+                    case "top-left":
+                        this.shape.x(startPos.x + cw / 2);
+                        this.shape.y(startPos.y + ch / 2);
+                        break;
+                    case "top-right":
+                        this.shape.x(startPos.x + width - 3 * cw / 2);
+                        this.shape.y(startPos.y + ch / 2);
+                        break;                        
+                    case "bottom-left":
+                        this.shape.x(startPos.x + cw / 2);
+                        this.shape.y(startPos.y + height - 3 * ch / 2);
+                        break;
+                    default: // "bottom-right" is the default case
+                        this.shape.x(startPos.x + width - 3 * cw / 2);
+                        this.shape.y(startPos.y + height - 3 * ch / 2);
+                        break;
+                }
+            };
+
+            ResizeCue.prototype.bindEvents = function () {
+                var node = this.parent;
+                var self = this;
+
+                var onClick = function() {
+                    if(typeof options.resizeToContentFunction === "function"){
+                        options.resizeToContentFunction([node]);
+                    }
+                    else{
+                        defaultResizeToContent(node);
+                    }
+                    cy.style().update();
+                    self.resizeControls.update();
+                }
+
+                // Resize node according to label
+                var defaultResizeToContent = function(node) {
+                    var context = document.createElement('canvas').getContext("2d");
+                    var style = node.style();
+                    context.font = style['font-size'] + " " + style['font-family'];
+
+                    var labelText = (style['label']).split("\n");
+
+                    var minWidth = 0;
+                    var minHeight = Math.max(context.measureText('M').width, 50);
+                    labelText.forEach(function(text){
+                        var textWidth = context.measureText(text).width;
+                        if (minWidth < textWidth)
+                            minWidth = textWidth;
+                    });
+
+                    if(minWidth !== 0){
+                        var bbox = node.data("bbox");
+                        bbox.w = minWidth * 1.1;
+                        bbox.h = minHeight * 1.1;
+                        node.data("bbox", bbox);
+                    }
+                }
+
+                this.shape.on("click", onClick);
+            };
+
+            ResizeCue.prototype.unbindEvents = function () {
+                this.shape.off("click");
+            };
+
             var getGrappleSize = function (node) {
                 return Math.max(1, cy.zoom()) * options.grappleSize * Math.min(node.width()/25, node.height()/25, 1);
+            };
+
+            var getResizeCueHeight = function (node) {
+                var w = node.width();
+                var h = node.height();
+                return Math.min(cy.zoom() * Math.max(Math.min(w/8, h/8), 16), h);
+            };
+
+            var getResizeCueWidth = function (node) {
+                return Math.min(getResizeCueHeight(node), node.width());
             };
 
             var getPadding = function () {
