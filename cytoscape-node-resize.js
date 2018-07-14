@@ -934,7 +934,7 @@
                 var cw = getResizeCueWidth(node);
                 
                 var imageObj = new Image();
-                imageObj.src = options.resizeToContentCueImage;
+                imageObj.src = window.location.origin + window.location.pathname + options.resizeToContentCueImage;
                 this.shape = new Konva.Image({
                     width: cw,
                     height: ch,
