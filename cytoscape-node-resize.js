@@ -1019,12 +1019,12 @@
             };
 
             var getResizeCueHeight = function (node) {
-                return Math.max(1, cy.zoom()) * options.grappleSize * 1.25 * Math.min(node.width()/25, node.height()/25, 1);
+                return Math.max(1, cy.zoom()) * options.grappleSize * 2 * Math.min(node.width()/25, node.height()/25, 1);
 
             };
 
             var getResizeCueWidth = function (node) {
-                return Math.max(1, cy.zoom()) * options.grappleSize * 1.25 * Math.min(node.width()/25, node.height()/25, 1);
+                return Math.max(1, cy.zoom()) * options.grappleSize * 2 * Math.min(node.width()/25, node.height()/25, 1);
             };
 
             var getPadding = function () {
