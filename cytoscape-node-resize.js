@@ -455,7 +455,10 @@
                     }
                     this.grapples.push(new Grapple(node, this, location, isActive))
                 };
-                this.resizeCue = new ResizeCue(node, this);
+
+                if(options.resizeToContentCueEnabled(node))
+                    this.resizeCue = new ResizeCue(node, this);
+                
                 canvas.draw();
             };
 
@@ -464,7 +467,9 @@
                 for(var i=0; i < this.grapples.length; i++) {
                     this.grapples[i].update();
                 };
-                this.resizeCue.update();
+                if(this.resizeCue)
+                    this.resizeCue.update();
+                
                 canvas.draw();
             };
 
@@ -476,9 +481,11 @@
                     this.grapples[i].shape.destroy();
                 };
                 delete this.grapples;
-                this.resizeCue.unbindEvents();
-                this.resizeCue.shape.destroy();
-                delete this.resizeCue;
+                if(this.resizeCue){
+                    this.resizeCue.unbindEvents();
+                    this.resizeCue.shape.destroy();
+                    delete this.resizeCue;
+                }
                 canvas.draw();
             };
 
@@ -1061,10 +1068,9 @@
                     if(minWidth !== 0){
                         setWidthFcn(node, minWidth * 1.1);
                         setHeightFcn(node, minHeight * 1.1);
-    
-                        cy.style().update();
-                        self.resizeControls.update();
                     }
+                    
+                    node.unselect();
 
                     return params;
                 }
@@ -1078,7 +1084,7 @@
                     setWidthFcn(node, newWidth);
                     setHeightFcn(node, newHeight);
     
-                    cy.style().update();
+                    node.unselect();
 
                     return params;
                 }
