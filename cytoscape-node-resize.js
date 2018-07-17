@@ -467,8 +467,12 @@
                 for(var i=0; i < this.grapples.length; i++) {
                     this.grapples[i].update();
                 };
+
+                var node = this.boundingRectangle.parent;
                 if(this.resizeCue)
                     this.resizeCue.update();
+                else if(options.resizeToContentCueEnabled(node))
+                    this.resizeCue = new ResizeCue(node, this);
                 
                 canvas.draw();
             };
