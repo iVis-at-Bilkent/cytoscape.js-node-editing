@@ -469,9 +469,16 @@
                 };
 
                 var node = this.boundingRectangle.parent;
-                if(this.resizeCue)
+                var rcEnabled = options.resizeToContentCueEnabled(node);
+
+                if(this.resizeCue && rcEnabled)
                     this.resizeCue.update();
-                else if(options.resizeToContentCueEnabled(node))
+                else if(this.resizeCue && !rcEnabled){
+                    this.resizeCue.unbindEvents();
+                    this.resizeCue.shape.destroy();
+                    delete this.resizeCue;
+                }
+                else if(!this.resizeCue && rcEnabled)
                     this.resizeCue = new ResizeCue(node, this);
                 
                 canvas.draw();
@@ -981,20 +988,20 @@
             ResizeCue.prototype.updateShapePosition = function (startPos, width, height, cw, ch) {
                 switch(options.resizeToContentCuePosition) {
                     case "top-left":
-                        this.shape.x(startPos.x + cw / 2);
-                        this.shape.y(startPos.y + ch / 2);
+                        this.shape.x(startPos.x + 0.4 * cw);
+                        this.shape.y(startPos.y + 0.4 * ch);
                         break;
                     case "top-right":
-                        this.shape.x(startPos.x + width - 3 * cw / 2);
-                        this.shape.y(startPos.y + ch / 2);
+                        this.shape.x(startPos.x + width - 1.4 * cw);
+                        this.shape.y(startPos.y + 0.4 * ch);
                         break;                        
                     case "bottom-left":
-                        this.shape.x(startPos.x + cw / 2);
-                        this.shape.y(startPos.y + height - 3 * ch / 2);
+                        this.shape.x(startPos.x + 0.4 * cw);
+                        this.shape.y(startPos.y + height - 1.4 * ch);
                         break;
                     default: // "bottom-right" is the default case
-                        this.shape.x(startPos.x + width - 3 * cw / 2);
-                        this.shape.y(startPos.y + height - 3 * ch / 2);
+                        this.shape.x(startPos.x + width - 1.4 * cw);
+                        this.shape.y(startPos.y + height - 1.4 * ch);
                         break;
                 }
             };
@@ -1030,12 +1037,12 @@
             };
 
             var getResizeCueHeight = function (node) {
-                return Math.max(1, cy.zoom()) * options.grappleSize * 2 * Math.min(node.width()/25, node.height()/25, 1);
+                return Math.max(1, cy.zoom()) * options.grappleSize * 1.25 * Math.min(node.width()/25, node.height()/25, 1);
 
             };
 
             var getResizeCueWidth = function (node) {
-                return Math.max(1, cy.zoom()) * options.grappleSize * 2 * Math.min(node.width()/25, node.height()/25, 1);
+                return Math.max(1, cy.zoom()) * options.grappleSize * 1.25 * Math.min(node.width()/25, node.height()/25, 1);
             };
 
             var getPadding = function () {
