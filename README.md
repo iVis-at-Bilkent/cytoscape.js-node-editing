@@ -84,6 +84,19 @@ Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstabl
                     sw: "sw-resize",
                     w: "w-resize"
                 }
+
+                // enable resize content cue according to the node
+                resizeToContentCueEnabled: function (node) {
+                  return true;
+                },
+                // handle resize to content with given function
+                // default function resizes node according to the label
+                resizeToContentFunction: undefined,
+                // select position of the resize to content cue
+                // options: 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+                resizeToContentCuePosition: 'bottom-right',
+                // relative path of the resize to content cue image
+                resizeToContentCueImage: '/node_modules/cytoscape-node-resize/resizeCue.svg',
              });
 ```
 
@@ -142,6 +155,7 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 `cy.on("noderesize.resizedrag", function(e, type, node){ })`
 
+`cy.on("noderesize.resizetocontent", function(e, node){ })`
 
 `type` param can be `topleft`, `topcenter`, `topright`, `centerright`, 
 `bottomright`, `bottomcenter`, `bottomleft`, `centerleft`
