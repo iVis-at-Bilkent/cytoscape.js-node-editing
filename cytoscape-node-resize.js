@@ -342,7 +342,9 @@
                   w: "w-resize"
               },
 
-              resizeToContentCueEnabled: true,
+              resizeToContentCueEnabled: function (node) {
+                  return true;
+              },
               resizeToContentFunction: undefined,
               resizeToContentCuePosition: 'bottom-right',
               resizeToContentCueImage: '/node_modules/cytoscape-node-resize/resizeCue.svg',
@@ -952,7 +954,7 @@
                 var cw = getResizeCueWidth(node);
                 
                 var imageObj = new Image();
-                imageObj.src = window.location.origin + window.location.pathname + options.resizeToContentCueImage;
+                imageObj.src = options.resizeToContentCueImage;
                 this.shape = new Konva.Image({
                     width: cw,
                     height: ch,
