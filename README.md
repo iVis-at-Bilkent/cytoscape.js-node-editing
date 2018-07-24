@@ -5,7 +5,7 @@ cytoscape-node-resize
 ## Description
 A Cytoscape.js extension to provide grapples to resize nodes, distributed under [The MIT License](https://opensource.org/licenses/MIT).
 
-![Image of extension](img.png){:height="20px"}
+<img src="img.png" width="200">
 
 ## Demo
 
