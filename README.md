@@ -3,7 +3,7 @@ cytoscape-node-resize
 
 
 ## Description
-A Cytoscape.js extension to provide grapples to resize nodes, distributed under [The MIT License](https://opensource.org/licenses/MIT).
+A Cytoscape.js extension to provide grapples to resize nodes and a visual cue to resize node to its label, distributed under [The MIT License](https://opensource.org/licenses/MIT).
 
 <img src="img.png" width="200">
 
@@ -57,10 +57,11 @@ Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstabl
                   return node.css('min-height-bias-bottom');
                 },
 
-                // These optional function will be executed to set the width/height of a node in this extension
-                // Using node.css() is not a recommended way (http://js.cytoscape.org/#eles.style) to do this. Therefore, overriding these defaults
-                // so that a data field or something like that will be used to set node dimentions instead of directly calling node.css() 
-                // is highly recommended (Of course this will require a proper setting in the stylesheet).
+                // These optional functions will be executed to set the width/height of a node in this extension
+                // Using node.css() is not a recommended way (http://js.cytoscape.org/#eles.style) to do this. Therefore,
+                // overriding these defaults so that a data field or something like that will be used to set node dimentions
+                // instead of directly calling node.css() is highly recommended (Of course this will require a proper 
+                // setting in the stylesheet).
                 setWidth: function(node, width) { 
                     node.css('width', width);
                 },
