@@ -1071,7 +1071,7 @@
                     var labelText = (style['label']).split("\n");
     
                     var minWidth = 0;
-                    var minHeight = Math.max(context.measureText('M').width, 50);
+                    var minHeight = Math.max(context.measureText('M').width * 1.1, 30);
                     labelText.forEach(function(text){
                         var textWidth = context.measureText(text).width;
                         if (minWidth < textWidth)
