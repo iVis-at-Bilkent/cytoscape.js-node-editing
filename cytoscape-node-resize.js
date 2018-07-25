@@ -458,7 +458,7 @@
                     this.grapples.push(new Grapple(node, this, location, isActive))
                 };
 
-                if(options.resizeToContentCueEnabled(node))
+                if(options.resizeToContentCueEnabled(node) && !options.isNoResizeMode(node))
                     this.resizeCue = new ResizeCue(node, this);
                 
                 canvas.draw();
@@ -1079,6 +1079,23 @@
                     });
     
                     if(minWidth !== 0){
+                        if(typeof options.isFixedAspectRatioResizeMode === 'function' && 
+                            options.isFixedAspectRatioResizeMode(node)){
+                            
+                            var ratio = node.width() / node.height();
+                            var tmpW = (minWidth < minHeight) ? minWidth : minHeight * ratio;
+                            var tmpH = (minWidth < minHeight) ? minWidth / ratio : minHeight;
+
+                            if(tmpW >= minWidth && tmpH >= minHeight){
+                                minWidth = tmpW;
+                                minHeight = tmpH;
+                            }
+                            else{
+                                minWidth = (minWidth < minHeight) ? minHeight * ratio : minWidth;
+                                minHeight = (minWidth < minHeight) ? minHeight : minWidth / ratio;
+                            }
+                        }
+
                         setWidthFcn(node, minWidth * 1.1);
                         setHeightFcn(node, minHeight * 1.1);
                     }
