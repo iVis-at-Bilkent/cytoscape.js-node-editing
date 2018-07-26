@@ -77,20 +77,16 @@
 						nodes: [
 							{ data: { id: 'j', name: 'Aspected Resize' }, classes: "fixedAspectRatioResizeMode" },
 							{ data: { id: 'e', name: 'Full Resize', parent: 'c'} },
-							{ data: { id: 'g', name: 'Multi Node Resize (Full)' } },
 							{ data: { id: 'k', name: 'No Resize' }, classes: "noResizeMode" },
 							{ data: { id: 'c', name: 'Full Resize' } }
 						],
 						edges: [
 							{ data: { source: 'j', target: 'e' } },
 							{ data: { source: 'j', target: 'k' } },
-							{ data: { source: 'j', target: 'g' } },
 							{ data: { source: 'e', target: 'j' } },
 							{ data: { source: 'e', target: 'k' } },
 							{ data: { source: 'k', target: 'j' } },
-							{ data: { source: 'k', target: 'e' } },
-							{ data: { source: 'k', target: 'g' } },
-							{ data: { source: 'g', target: 'j' } }
+							{ data: { source: 'k', target: 'e' } }
 						]
 					}
 				});
