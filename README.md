@@ -9,7 +9,7 @@ A Cytoscape.js extension to provide grapples to resize nodes and a visual cue to
 
 ## Demo
 
-Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/demo.html) (simple) or [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/undoable_demo.html) (undoable) for demos
+Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-resize/demo.html) (simple) or [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-resize/undoable_demo.html) (undoable) for demos
 
 ## Default Options
 
