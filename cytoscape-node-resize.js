@@ -664,7 +664,9 @@
                     };
                     
                     cy.trigger("noderesize.resizestart", [self.location, self.parent]);
-                    tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
+                    if(cy.style()._private.coreStyle["active-bg-opacity"]){
+                        tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
+                    }
                     cy.style()
                         .selector("core")
                         .style("active-bg-opacity", 0)
