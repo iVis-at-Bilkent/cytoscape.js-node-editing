@@ -256,7 +256,7 @@
               grappleSize: 8, // size of square dots
               grappleColor: "green", // color of grapples
               inactiveGrappleStroke: "inside 1px blue",
-              boundingRectangle: true, // enable/disable bounding rectangle
+              //boundingRectangle: true, // enable/disable bounding rectangle
               boundingRectangleLineDash: [4, 8], // line dash of bounding rectangle
               boundingRectangleLineColor: "red",
               boundingRectangleLineWidth: 1.5,
@@ -411,7 +411,7 @@
                         'position': 'absolute',
                         'top': 0,
                         'left': 0,
-                        'z-index': '999'
+                        'z-index': options.zIndex
                     });
 
                 setTimeout(function () {

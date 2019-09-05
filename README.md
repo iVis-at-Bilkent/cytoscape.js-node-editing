@@ -9,7 +9,7 @@ A Cytoscape.js extension to provide grapples to resize nodes and a visual cue to
 
 ## Demo
 
-Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-resize/demo.html) (simple) or [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-resize/undoable_demo.html) (undoable) for demos
+Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/demo.html) (simple) or [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/undoable_demo.html) (undoable) for demos
 
 ## Default Options
 
@@ -20,8 +20,7 @@ Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-resize/demo.htm
     
                 grappleSize: 8, // size of square dots
                 grappleColor: "green", // color of grapples
-                inactiveGrappleStroke: "inside 1px blue",
-                boundingRectangle: true, // enable/disable bounding rectangle
+                inactiveGrappleStroke: "inside 1px blue",               
                 boundingRectangleLineDash: [4, 8], // line dash of bounding rectangle
                 boundingRectangleLineColor: "red",
                 boundingRectangleLineWidth: 1.5,
@@ -116,7 +115,7 @@ Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-resize/demo.htm
 
 ## Dependencies
 
- * Cytoscape.js ^2.7.0
+ * Cytoscape.js ^3.2.0
  * jquery ^1.7.0 || ^2.0.0 || ^3.0.0
  * konva ^1.6.3
  * cytoscape-undo-redo ^1.0.10 (optional)
