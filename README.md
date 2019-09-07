@@ -99,7 +99,6 @@ Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstabl
                 resizeToContentCueImage: '/node_modules/cytoscape-node-resize/resizeCue.svg',
              });
 ```
-*Note that this extension creates a new canvas on the viewport with z-index value '999'. If your application uses any other canvas, please arrange its z-index value accordingly.*
 
 ## API
 
