@@ -256,7 +256,7 @@
               grappleSize: 8, // size of square dots
               grappleColor: "green", // color of grapples
               inactiveGrappleStroke: "inside 1px blue",
-              boundingRectangle: true, // enable/disable bounding rectangle
+              //boundingRectangle: true, // enable/disable bounding rectangle
               boundingRectangleLineDash: [4, 8], // line dash of bounding rectangle
               boundingRectangleLineColor: "red",
               boundingRectangleLineWidth: 1.5,
@@ -341,7 +341,14 @@
                   s: "s-resize",
                   sw: "sw-resize",
                   w: "w-resize"
-              }
+              },
+
+              resizeToContentCueEnabled: function (node) {
+                  return true;
+              },
+              resizeToContentFunction: undefined,
+              resizeToContentCuePosition: 'bottom-right',
+              resizeToContentCueImage: '/node_modules/cytoscape-node-resize/resizeCue.svg',
           };
         }
 
@@ -405,7 +412,7 @@
                         'position': 'absolute',
                         'top': 0,
                         'left': 0,
-                        'z-index': '999'
+                        'z-index': options.zIndex
                     });
 
                 setTimeout(function () {
@@ -451,6 +458,10 @@
                     }
                     this.grapples.push(new Grapple(node, this, location, isActive))
                 };
+
+                if(options.resizeToContentCueEnabled(node) && !options.isNoResizeMode(node))
+                    this.resizeCue = new ResizeCue(node, this);
+                
                 canvas.draw();
             };
 
@@ -459,6 +470,20 @@
                 for(var i=0; i < this.grapples.length; i++) {
                     this.grapples[i].update();
                 };
+
+                var node = this.boundingRectangle.parent;
+                var rcEnabled = options.resizeToContentCueEnabled(node);
+
+                if(this.resizeCue && rcEnabled)
+                    this.resizeCue.update();
+                else if(this.resizeCue && !rcEnabled){
+                    this.resizeCue.unbindEvents();
+                    this.resizeCue.shape.destroy();
+                    delete this.resizeCue;
+                }
+                else if(!this.resizeCue && rcEnabled)
+                    this.resizeCue = new ResizeCue(node, this);
+                
                 canvas.draw();
             };
 
@@ -470,6 +495,11 @@
                     this.grapples[i].shape.destroy();
                 };
                 delete this.grapples;
+                if(this.resizeCue){
+                    this.resizeCue.unbindEvents();
+                    this.resizeCue.shape.destroy();
+                    delete this.resizeCue;
+                }
                 canvas.draw();
             };
 
@@ -635,7 +665,9 @@
                     };
                     
                     cy.trigger("noderesize.resizestart", [self.location, self.parent]);
-                    tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
+                    if(cy.style()._private.coreStyle["active-bg-opacity"]){
+                        tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
+                    }
                     cy.style()
                         .selector("core")
                         .style("active-bg-opacity", 0)
@@ -909,13 +941,188 @@
                 }
             };
 
+            var ResizeCue = function (node, resizeControls) {
+                this.parent = node;
+                this.resizeControls = resizeControls;
+
+                var nodePos = node.renderedPosition();
+                var width = node.renderedOuterWidth() + getPadding();
+                var height = node.renderedOuterHeight() + getPadding();
+                var startPos = {
+                    x: nodePos.x - width / 2,
+                    y: nodePos.y - height / 2
+                };
+                
+                var ch = getResizeCueHeight(node);
+                var cw = getResizeCueWidth(node);
+                
+                var imageObj = new Image();
+                imageObj.src = options.resizeToContentCueImage;
+                this.shape = new Konva.Image({
+                    width: cw,
+                    height: ch,
+                    image: imageObj
+                });
+                
+                imageObj.onload = function() {
+                    canvas.draw();
+                }
+
+                this.updateShapePosition(startPos, width, height, cw, ch);
+                this.bindEvents();
+                canvas.add(this.shape);
+            }
+
+            ResizeCue.prototype.update = function() {
+                var nodePos = this.parent.renderedPosition();
+                var width = this.parent.renderedOuterWidth() + getPadding();
+                var height = this.parent.renderedOuterHeight() + getPadding();
+                var startPos = {
+                    x: nodePos.x - width / 2,
+                    y: nodePos.y - height / 2
+                };
+
+                var ch = getResizeCueHeight(this.parent);
+                var cw = getResizeCueWidth(this.parent);
+
+                this.shape.width(cw);
+                this.shape.height(ch);
+                this.updateShapePosition(startPos, width, height, cw, ch);
+            };
+
+            ResizeCue.prototype.updateShapePosition = function (startPos, width, height, cw, ch) {
+                switch(options.resizeToContentCuePosition) {
+                    case "top-left":
+                        this.shape.x(startPos.x + 0.4 * cw);
+                        this.shape.y(startPos.y + 0.4 * ch);
+                        break;
+                    case "top-right":
+                        this.shape.x(startPos.x + width - 1.4 * cw);
+                        this.shape.y(startPos.y + 0.4 * ch);
+                        break;                        
+                    case "bottom-left":
+                        this.shape.x(startPos.x + 0.4 * cw);
+                        this.shape.y(startPos.y + height - 1.4 * ch);
+                        break;
+                    default: // "bottom-right" is the default case
+                        this.shape.x(startPos.x + width - 1.4 * cw);
+                        this.shape.y(startPos.y + height - 1.4 * ch);
+                        break;
+                }
+            };
+
+            ResizeCue.prototype.bindEvents = function () {
+                var node = this.parent;
+                var self = this;
+
+                var onClick = function() {
+                    if(typeof options.resizeToContentFunction === "function"){
+                        options.resizeToContentFunction([node]);
+                    }
+                    else if(cy.undoRedo && options.undoable)
+                        cy.trigger('noderesize.resizetocontent', [self]);
+                    else{
+                        var params = {
+                            self: self,
+                            firstTime: true
+                        }
+                        defaultResizeToContent(params);                    
+                    }
+                }
+
+                this.shape.on("click", onClick);
+            };
+
+            ResizeCue.prototype.unbindEvents = function () {
+                this.shape.off("click");
+            };
+
             var getGrappleSize = function (node) {
                 return Math.max(1, cy.zoom()) * options.grappleSize * Math.min(node.width()/25, node.height()/25, 1);
+            };
+
+            var getResizeCueHeight = function (node) {
+                return Math.max(1, cy.zoom()) * options.grappleSize * 1.25 * Math.min(node.width()/25, node.height()/25, 1);
+
+            };
+
+            var getResizeCueWidth = function (node) {
+                return Math.max(1, cy.zoom()) * options.grappleSize * 1.25 * Math.min(node.width()/25, node.height()/25, 1);
             };
 
             var getPadding = function () {
                 return options.padding*Math.max(1, cy.zoom());
             };
+
+            var defaultResizeToContent = function(params) {
+                var self = params.self;
+                var node = self.parent;
+                
+                var setWidthFcn = node.isParent() ? options.setCompoundMinWidth : options.setWidth; 
+                var setHeightFcn = node.isParent() ? options.setCompoundMinHeight : options.setHeight; 
+                
+                if(params.firstTime){
+                    delete params.firstTime;
+                    
+                    params.oldWidth = node.width();
+                    params.oldHeight = node.height();
+
+                    var context = document.createElement('canvas').getContext("2d");
+                    var style = node.style();
+                    context.font = style['font-size'] + " " + style['font-family'];
+    
+                    var labelText = (style['label']).split("\n");
+    
+                    var minWidth = 0;
+                    var minHeight = Math.max(context.measureText('M').width * 1.1, 30);
+                    labelText.forEach(function(text){
+                        var textWidth = context.measureText(text).width;
+                        if (minWidth < textWidth)
+                            minWidth = textWidth;
+                    });
+    
+                    if(minWidth !== 0){
+                        if(typeof options.isFixedAspectRatioResizeMode === 'function' && 
+                            options.isFixedAspectRatioResizeMode(node)){
+                            
+                            var ratio = node.width() / node.height();
+                            var tmpW = (minWidth < minHeight) ? minWidth : minHeight * ratio;
+                            var tmpH = (minWidth < minHeight) ? minWidth / ratio : minHeight;
+
+                            if(tmpW >= minWidth && tmpH >= minHeight){
+                                minWidth = tmpW;
+                                minHeight = tmpH;
+                            }
+                            else{
+                                minWidth = (minWidth < minHeight) ? minHeight * ratio : minWidth;
+                                minHeight = (minWidth < minHeight) ? minHeight : minWidth / ratio;
+                            }
+                        }
+
+                        setWidthFcn(node, minWidth * 1.1);
+                        setHeightFcn(node, minHeight * 1.1);
+                    }
+                    
+                    node.unselect();
+
+                    return params;
+                }
+                else{  
+                    var newWidth = params.oldWidth;
+                    var newHeight = params.oldHeight;
+                    
+                    params.oldWidth = node.width();
+                    params.oldHeight = node.height();
+
+                    setWidthFcn(node, newWidth);
+                    setHeightFcn(node, newHeight);
+    
+                    node.unselect();
+
+                    return params;
+                }
+                
+            }
 
             function getTopMostNodes(nodes) {
                 var nodesMap = {};
@@ -1245,6 +1452,15 @@
                     }
                 });
 
+                cy.on("noderesize.resizetocontent", function (e, self) {
+                    var params = {
+                        self: self,
+                        firstTime: true
+                    }
+
+                    cy.undoRedo().do("resizeToContent", params); 
+                });
+
                 var resizeDo = function (arg) {
                     // If this is the first time it means that resize is already performed through user interaction.
                     // In this case just removing the first time parameter is enough.
@@ -1332,6 +1548,7 @@
 
                 cy.undoRedo().action("resize", resizeDo, resizeDo);
                 cy.undoRedo().action("noderesize.move", moveDo, moveDo);
+                cy.undoRedo().action("resizeToContent", defaultResizeToContent, defaultResizeToContent);
             }
 
             var api = {}; // The extension api to be exposed

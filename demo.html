@@ -48,7 +48,8 @@
 						{
 							selector: 'node',
 							style: {
-								'content': 'data(name)'
+								'content': 'data(name)',
+								'textValign': 'center'
 							}
 						},
 
@@ -67,30 +68,30 @@
 						}
 					],
 
+					layout: { name: 'grid', rows: 2, cols: 2},
+					
+					wheelSensitivity: 0.1,
+
 					elements: {
 						nodes: [
 							{ data: { id: 'j', name: 'Aspected Resize' }, classes: "fixedAspectRatioResizeMode" },
 							{ data: { id: 'e', name: 'Full Resize' } },
-							{ data: { id: 'g', name: 'Multi Node Resize (Full)' } },
-							{ data: { id: 'k', name: 'No Resize' }, classes: "noResizeMode" },
-							{ data: { id: 'l', name: 'No Controls' }, classes: "noControlsMode" }
+							{ data: { id: 'k', name: 'No Resize' }, classes: "noResizeMode" }
 						],
 						edges: [
 							{ data: { source: 'j', target: 'e' } },
 							{ data: { source: 'j', target: 'k' } },
-							{ data: { source: 'j', target: 'g' } },
 							{ data: { source: 'e', target: 'j' } },
 							{ data: { source: 'e', target: 'k' } },
 							{ data: { source: 'k', target: 'j' } },
-							{ data: { source: 'k', target: 'e' } },
-							{ data: { source: 'k', target: 'g' } },
-							{ data: { source: 'l', target: 'e' } },
-							{ data: { source: 'g', target: 'j' } }
+							{ data: { source: 'k', target: 'e' } }
 						]
 					}
 				});
 
-				cy.nodeResize();
+				cy.nodeResize({
+					resizeToContentCueImage: 'resizeCue.svg'
+				});
 
 				cy.on("noderesize.resizestart", function (e, type) {
 					console.log(type);

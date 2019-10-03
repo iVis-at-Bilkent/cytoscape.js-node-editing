@@ -49,7 +49,8 @@
 						{
 							selector: 'node',
 							style: {
-								'content': 'data(name)'
+								'content': 'data(name)',
+								'textValign': 'center'
 							}
 						},
 
@@ -67,32 +68,33 @@
 							}
 						}
 					],
+					
+					layout: { name: 'grid', rows: 2, cols: 2},
+					
+					wheelSensitivity: 0.1,
 
 					elements: {
 						nodes: [
 							{ data: { id: 'j', name: 'Aspected Resize' }, classes: "fixedAspectRatioResizeMode" },
 							{ data: { id: 'e', name: 'Full Resize', parent: 'c'} },
-							{ data: { id: 'g', name: 'Multi Node Resize (Full)' } },
 							{ data: { id: 'k', name: 'No Resize' }, classes: "noResizeMode" },
 							{ data: { id: 'c', name: 'Full Resize' } }
 						],
 						edges: [
 							{ data: { source: 'j', target: 'e' } },
 							{ data: { source: 'j', target: 'k' } },
-							{ data: { source: 'j', target: 'g' } },
 							{ data: { source: 'e', target: 'j' } },
 							{ data: { source: 'e', target: 'k' } },
 							{ data: { source: 'k', target: 'j' } },
-							{ data: { source: 'k', target: 'e' } },
-							{ data: { source: 'k', target: 'g' } },
-							{ data: { source: 'g', target: 'j' } }
+							{ data: { source: 'k', target: 'e' } }
 						]
 					}
 				});
 
 				cy.nodeResize({
 					undoable: true,
-				  });
+					resizeToContentCueImage: 'resizeCue.svg'
+				});
 
 				cy.on("noderesize.resizestart", function (e, type) {
 					console.log(type);

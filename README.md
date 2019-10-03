@@ -3,9 +3,9 @@ cytoscape-node-resize
 
 
 ## Description
-A Cytoscape.js extension to provide grapples to resize nodes, distributed under [The MIT License](https://opensource.org/licenses/MIT).
+A Cytoscape.js extension to provide grapples to resize nodes and a visual cue to resize node to its label, distributed under [The MIT License](https://opensource.org/licenses/MIT).
 
-![Image of extension](img.png)
+<img src="node-resize-animated-demo.gif" width="340">
 
 ## Demo
 
@@ -20,8 +20,7 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/ma
     
                 grappleSize: 8, // size of square dots
                 grappleColor: "green", // color of grapples
-                inactiveGrappleStroke: "inside 1px blue",
-                boundingRectangle: true, // enable/disable bounding rectangle
+                inactiveGrappleStroke: "inside 1px blue",               
                 boundingRectangleLineDash: [4, 8], // line dash of bounding rectangle
                 boundingRectangleLineColor: "red",
                 boundingRectangleLineWidth: 1.5,
@@ -57,10 +56,11 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/ma
                   return node.css('min-height-bias-bottom');
                 },
 
-                // These optional function will be executed to set the width/height of a node in this extension
-                // Using node.css() is not a recommended way (http://js.cytoscape.org/#eles.style) to do this. Therefore, overriding these defaults
-                // so that a data field or something like that will be used to set node dimentions instead of directly calling node.css() 
-                // is highly recommended (Of course this will require a proper setting in the stylesheet).
+                // These optional functions will be executed to set the width/height of a node in this extension
+                // Using node.css() is not a recommended way (http://js.cytoscape.org/#eles.style) to do this. Therefore,
+                // overriding these defaults so that a data field or something like that will be used to set node dimentions
+                // instead of directly calling node.css() is highly recommended (Of course this will require a proper 
+                // setting in the stylesheet).
                 setWidth: function(node, width) { 
                     node.css('width', width);
                 },
@@ -85,6 +85,19 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/ma
                     sw: "sw-resize",
                     w: "w-resize"
                 }
+
+                // enable resize content cue according to the node
+                resizeToContentCueEnabled: function (node) {
+                  return true;
+                },
+                // handle resize to content with given function
+                // default function resizes node according to the label
+                resizeToContentFunction: undefined,
+                // select position of the resize to content cue
+                // options: 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+                resizeToContentCuePosition: 'bottom-right',
+                // relative path of the resize to content cue image
+                resizeToContentCueImage: '/node_modules/cytoscape-node-resize/resizeCue.svg',
              });
 ```
 
@@ -102,7 +115,7 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/ma
 
 ## Dependencies
 
- * Cytoscape.js ^2.7.0
+ * Cytoscape.js ^3.2.0
  * jquery ^1.7.0 || ^2.0.0 || ^3.0.0
  * konva ^1.6.3
  * cytoscape-undo-redo ^1.0.10 (optional)
@@ -143,6 +156,7 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 `cy.on("noderesize.resizedrag", function(e, type, node){ })`
 
+`cy.on("noderesize.resizetocontent", function(e, node){ })`
 
 `type` param can be `topleft`, `topcenter`, `topright`, `centerright`, 
 `bottomright`, `bottomcenter`, `bottomleft`, `centerleft`
@@ -159,4 +173,4 @@ This project is set up to automatically be published to npm and bower.  To publi
 
 ## Team
 
-  * [Selim Firat Yilmaz](https://github.com/mrsfy), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
+  * [Metin Can Siper](https://github.com/metincansiper), [Ahmet Candiroglu](https://github.com/ahmetcandiroglu), [Selim Firat Yilmaz](https://github.com/mrsfy), and [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
