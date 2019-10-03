@@ -9,7 +9,7 @@ A Cytoscape.js extension to provide grapples to resize nodes and a visual cue to
 
 ## Demo
 
-Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/demo.html) (simple) or [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/undoable_demo.html) (undoable) for demos
+Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/master/demo.html) (simple) or [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/master/undoable_demo.html) (undoable) for demos
 
 ## Default Options
 
@@ -70,6 +70,7 @@ Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstabl
     
                 isFixedAspectRatioResizeMode: function (node) { return node.is(".fixedAspectRatioResizeMode") },// with only 4 active grapples (at corners)
                 isNoResizeMode: function (node) { return node.is(".noResizeMode, :parent") }, // no active grapples
+                isNoControlsMode: function (node) { return node.is(".noControlsMode") }, // no controls - do not draw grapples
     
                 cursors: { // See http://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
                     // May take any "cursor" css property
