@@ -13,7 +13,7 @@ U. Dogrusoz , A. Karacelik, I. Safarli, H. Balci, L. Dervishi, and M.C. Siper, "
 
 ## Demo
 
-Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/master/demo.html) (simple) or [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/master/undoable_demo.html) (undoable) for demos
+Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/demo.html) (simple) or [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/undoable_demo.html) (undoable) for demos
 
 ## Default Options
 
