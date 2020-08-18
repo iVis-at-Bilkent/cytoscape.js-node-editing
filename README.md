@@ -1,9 +1,13 @@
-cytoscape-node-resize
+cytoscape-node-editing
 ================================================================================
 
 
 ## Description
-A Cytoscape.js extension to provide grapples to resize nodes and a visual cue to resize node to its label, distributed under [The MIT License](https://opensource.org/licenses/MIT).
+A Cytoscape.js extension to provide certain node editing functionality as follows:
+- grapples to resize nodes,
+- a visual cue to resize node to its label, and
+- ability to move selected nodes with arrow keys (accelerator keys *Alt* and *Shift* result in slower and faster moves, respectively),
+distributed under [The MIT License](https://opensource.org/licenses/MIT).
 
 <img src="node-resize-animated-demo.gif" width="340">
 
@@ -13,7 +17,7 @@ U. Dogrusoz , A. Karacelik, I. Safarli, H. Balci, L. Dervishi, and M.C. Siper, "
 
 ## Demo
 
-Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/demo.html) (simple) or [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/undoable_demo.html) (undoable) for demos
+Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/unstable/demo.html) (simple) or [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/unstable/undoable_demo.html) (undoable) for demos
 
 ## Default Options
 
@@ -101,7 +105,7 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/un
                 // options: 'top-left', 'top-right', 'bottom-left', 'bottom-right'
                 resizeToContentCuePosition: 'bottom-right',
                 // relative path of the resize to content cue image
-                resizeToContentCueImage: '/node_modules/cytoscape-node-resize/resizeCue.svg',
+                resizeToContentCueImage: '/node_modules/cytoscape-node-editing/resizeCue.svg',
              });
 ```
 
@@ -128,8 +132,8 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/un
 ## Usage instructions
 
 Download the library:
- * via npm: `npm install cytoscape-node-resize`,
- * via bower: `bower install cytoscape-node-resize`, or
+ * via npm: `npm install cytoscape-node-editing`,
+ * via bower: `bower install cytoscape-node-editing`, or
  * via direct download in the repository (probably from a tag).
 
 `require()` the library as appropriate for your project:
@@ -137,7 +141,7 @@ Download the library:
 CommonJS:
 ```js
 var cytoscape = require('cytoscape');
-var nodeResize = require('cytoscape-node-resize');
+var nodeResize = require('cytoscape-node-editing');
 var konva = require('konva');
 
 nodeResize( cytoscape, jQuery, konva ); // register extension
@@ -145,7 +149,7 @@ nodeResize( cytoscape, jQuery, konva ); // register extension
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-node-resize', 'jquery', 'konva'], function( cytoscape, nodeResize, jQuery, konva ){
+require(['cytoscape', 'cytoscape-node-editing', 'jquery', 'konva'], function( cytoscape, nodeResize, jQuery, konva ){
   nodeResize( cytoscape, jQuery, konva ); // register extension
 });
 ```
@@ -173,7 +177,7 @@ This project is set up to automatically be published to npm and bower.  To publi
 
 1. Set the version number environment variable: `export VERSION=1.2.3`
 1. Publish: `gulp publish`
-1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-node-resize https://github.com/iVis-at-Bilkent/cytoscape.js-node-resize.git`
+1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-node-editing https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing.git`
 
 ## Team
 
