@@ -9,7 +9,7 @@ A Cytoscape.js extension to provide certain node editing functionality as follow
 - ability to move selected nodes with arrow keys (accelerator keys *Alt* and *Shift* result in slower and faster moves, respectively),
 distributed under [The MIT License](https://opensource.org/licenses/MIT).
 
-<img src="node-resize-animated-demo.gif" width="340">
+<img src="node-editing-animated-demo.gif" width="340">
 
 Please cite the following paper when using this extension:
 
@@ -22,7 +22,7 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/u
 ## Default Options
 
 ```js
-            cy.nodeResize({
+            cy.nodeEditing({
                 padding: 5, // spacing between node and grapples/rectangle
                 undoable: true, // and if cy.undoRedo exists
     
@@ -111,7 +111,7 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/u
 
 ## API
 
-  `var api = cy.nodeResize('get')`
+  `var api = cy.nodeEditing('get')`
    To get the extension instance after initialization.
 
   `api.refreshGrapples()`
@@ -141,16 +141,16 @@ Download the library:
 CommonJS:
 ```js
 var cytoscape = require('cytoscape');
-var nodeResize = require('cytoscape-node-editing');
+var nodeEditing = require('cytoscape-node-editing');
 var konva = require('konva');
 
-nodeResize( cytoscape, jQuery, konva ); // register extension
+nodeEditing( cytoscape, jQuery, konva ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-node-editing', 'jquery', 'konva'], function( cytoscape, nodeResize, jQuery, konva ){
-  nodeResize( cytoscape, jQuery, konva ); // register extension
+require(['cytoscape', 'cytoscape-node-editing', 'jquery', 'konva'], function( cytoscape, nodeEditing, jQuery, konva ){
+  nodeEditing( cytoscape, jQuery, konva ); // register extension
 });
 ```
 
@@ -158,13 +158,13 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 
 ## Emitted Events
-`cy.on("noderesize.resizestart", function(e, type, node){ })`
+`cy.on("nodeediting.resizestart", function(e, type, node){ })`
 
-`cy.on("noderesize.resizeend", function(e, type, node){ })`
+`cy.on("nodeediting.resizeend", function(e, type, node){ })`
 
-`cy.on("noderesize.resizedrag", function(e, type, node){ })`
+`cy.on("nodeediting.resizedrag", function(e, type, node){ })`
 
-`cy.on("noderesize.resizetocontent", function(e, node){ })`
+`cy.on("nodeediting.resizetocontent", function(e, node){ })`
 
 `type` param can be `topleft`, `topcenter`, `topright`, `centerright`, 
 `bottomright`, `bottomcenter`, `bottomleft`, `centerleft`
