@@ -1151,24 +1151,10 @@
                 var topMostNodes = getTopMostNodes(nodes);
                 var nodesToMove = topMostNodes.union(topMostNodes.descendants());
 
-                nodesToMove.positions(function(node, i) {
-                    if(typeof node === "number") {
-                        node = i;
-                    }
-                    var oldX = node.position("x");
-                    var oldY = node.position("y");
-                    if (node.isParent())
-                    {
-                        return {
-                            x: oldX,
-                            y: oldY
-                        };
-                    }
-                    return {
-                        x: oldX + positionDiff.x,
-                        y: oldY + positionDiff.y
-                    };
-                });
+              nodes.shift({
+                x : positionDiff.x,
+                y : positionDiff.y
+              })
             }
 
             var selectedNodesToMove;
@@ -1194,11 +1180,10 @@
                         case 32: e.preventDefault(); break; // Space
                         default: break; // do not block other keys
                     }
-
-					
-                    if (e.keyCode < '37' || e.keyCode > '40') {
+                    if (e.keyCode < 37 || e.keyCode > 40) {
                         return;
                     }
+                    e.preventDefault();
 
                     if (!nodesMoving)
                     {
@@ -1206,57 +1191,29 @@
                         cy.trigger("noderesize.movestart", [selectedNodesToMove]);
                         nodesMoving = true;
                     }
-                    if (e.altKey && e.which == '38') {
-                        // up arrow and alt
-                        moveNodes ({x:0, y:-1},selectedNodesToMove);
+
+                    var moveSpeed = 3;
+                    if (e.altKey) {
+                      moveSpeed = 1;
                     }
-                    else if (e.altKey && e.which == '40') {
-                        // down arrow and alt
-                        moveNodes ({x:0, y:1},selectedNodesToMove);
-                    }
-                    else if (e.altKey && e.which == '37') {
-                        // left arrow and alt
-                        moveNodes ({x:-1, y:0},selectedNodesToMove);
-                    }
-                    else if (e.altKey && e.which == '39') {
-                        // right arrow and alt
-                        moveNodes ({x:1, y:0},selectedNodesToMove);
+                    else if (e.shiftKey) {
+                      moveSpeed = 10;
                     }
 
-                    else if (e.shiftKey && e.which == '38') {
-                        // up arrow and shift
-                        moveNodes ({x:0, y:-10},selectedNodesToMove);
-                    }
-                    else if (e.shiftKey && e.which == '40') {
-                        // down arrow and shift
-                        moveNodes ({x:0, y:10},selectedNodesToMove);
-                    }
-                    else if (e.shiftKey && e.which == '37') {
-                        // left arrow and shift
-                        moveNodes ({x:-10, y:0},selectedNodesToMove);
+                    var upArrowCode = 38;
+                    var downArrowCode = 40;
+                    var leftArrowCode = 37;
+                    var rightArrowCode = 39;
 
-                    }
-                    else if (e.shiftKey && e.which == '39' ) {
-                        // right arrow and shift
-                        moveNodes ({x:10, y:0},selectedNodesToMove);
-                    }
+                    var dx = 0;
+                    var dy = 0;
 
-                    else if (e.keyCode == '38') {
-                        // up arrow
-                        moveNodes ({x:0, y:-3},selectedNodesToMove);
-                    }
-                    else if (e.keyCode == '40') {
-                        // down arrow
-                        moveNodes ({x:0, y:3},selectedNodesToMove);
-                    }
-                    else if (e.keyCode == '37') {
-                        // left arrow
-                        moveNodes ({x:-3, y:0},selectedNodesToMove);
-                    }
-                    else if (e.keyCode == '39') {
-                        //right arrow
-                        moveNodes ({x:3, y:0},selectedNodesToMove);
-                    }
+                    dx += keys[rightArrowCode] ? moveSpeed : 0;
+                    dx -= keys[leftArrowCode] ? moveSpeed : 0;
+                    dy += keys[downArrowCode] ? moveSpeed : 0;
+                    dy -= keys[upArrowCode] ? moveSpeed : 0;
+
+                    moveNodes({x:dx, y:dy}, selectedNodesToMove);
                 }
             }
 
@@ -1264,7 +1221,8 @@
                 if (e.keyCode < '37' || e.keyCode > '40') {
                     return;
                 }
-
+                e.preventDefault();
+                keys[e.keyCode] = false;
                 var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
                         ? options.moveSelectedNodesOnKeyEvents() : options.moveSelectedNodesOnKeyEvents;
 
