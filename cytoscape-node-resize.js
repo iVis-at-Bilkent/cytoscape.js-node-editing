@@ -1151,16 +1151,38 @@
                 var topMostNodes = getTopMostNodes(nodes);
                 var nodesToMove = topMostNodes.union(topMostNodes.descendants());
 
-              nodes.shift({
-                x : positionDiff.x,
-                y : positionDiff.y
-              })
+                nodesToMove.positions(function(node, i) {
+                  if(typeof node === "number") {
+                      node = i;
+                  }
+                  var oldX = node.position("x");
+                  var oldY = node.position("y");
+                  if (node.isParent())
+                  {
+                      return {
+                          x: oldX,
+                          y: oldY
+                      };
+                  }
+                  return {
+                      x: oldX + positionDiff.x,
+                      y: oldY + positionDiff.y
+                  };
+              });
             }
 
             var selectedNodesToMove;
             var nodesMoving = false;
 
-            var keys = {};
+            // track arrow key presses, default false
+            // event.keyCode normally returns number
+            // but JS will convert to string anyway
+            var keys = {
+              '37': false,
+              '38': false,
+              '39': false,
+              '40': false
+            };
             function keyDown(e) {
 
                 var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
@@ -1174,7 +1196,6 @@
                 var tn = document.activeElement.tagName;
                 if (tn != "TEXTAREA" && tn != "INPUT")
                 {
-                    keys[e.keyCode] = true;
                     switch(e.keyCode){
                         case 37: case 39: case 38:  case 40: // Arrow keys
                         case 32: e.preventDefault(); break; // Space
@@ -1183,6 +1204,7 @@
                     if (e.keyCode < 37 || e.keyCode > 40) {
                         return;
                     }
+                    keys[e.keyCode] = true;
                     e.preventDefault();
 
                     if (!nodesMoving)
@@ -1193,7 +1215,12 @@
                     }
 
                     var moveSpeed = 3;
-                    if (e.altKey) {
+                    
+                    // doesn't make sense if alt and shift both pressed
+                    if(e.altKey && e.shiftKey) {
+                      return;
+                    }
+                    else if (e.altKey) {
                       moveSpeed = 1;
                     }
                     else if (e.shiftKey) {
@@ -1223,6 +1250,7 @@
                 }
                 e.preventDefault();
                 keys[e.keyCode] = false;
+
                 var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
                         ? options.moveSelectedNodesOnKeyEvents() : options.moveSelectedNodesOnKeyEvents;
 
