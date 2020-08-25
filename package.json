@@ -1,17 +1,17 @@
 {
-  "name": "cytoscape-node-resize",
+  "name": "cytoscape-node-editing",
   "version": "3.2.0",
   "description": "",
-  "main": "cytoscape-node-resize.js",
+  "main": "cytoscape-node-editing.js",
   "spm": {
-    "main": "cytoscape-node-resize.js"
+    "main": "cytoscape-node-editing.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-resize.git"
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing.git"
   },
   "keywords": [
     "cytoscape",
@@ -19,9 +19,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-resize/issues"
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing/issues"
   },
-  "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-resize",
+  "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing",
   "peerDependencies": {
     "cytoscape": "^3.2.0",
     "jquery": "^1.7.0 || ^2.0.0 || ^3.0.0",
