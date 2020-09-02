@@ -25,7 +25,7 @@
   "peerDependencies": {
     "cytoscape": "^3.2.0",
     "jquery": "^1.7.0 || ^2.0.0 || ^3.0.0",
-    "konva": "^1.6.3"
+    "konva": "^7.0.3"
   },
   "devDependencies": {
     "gulp": "^3.8.8",
