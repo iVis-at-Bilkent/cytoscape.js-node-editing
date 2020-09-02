@@ -17,7 +17,7 @@ U. Dogrusoz , A. Karacelik, I. Safarli, H. Balci, L. Dervishi, and M.C. Siper, "
 
 ## Demo
 
-Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/unstable/demo.html) (simple) or [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/unstable/undoable_demo.html) (undoable) for demos
+Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/demo.html) (simple) or [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-resize/unstable/undoable_demo.html) (undoable) for demos
 
 ## Default Options
 
@@ -125,7 +125,7 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/u
 
  * Cytoscape.js ^3.2.0
  * jquery ^1.7.0 || ^2.0.0 || ^3.0.0
- * konva ^1.6.3
+ * konva ^7.0.3
  * cytoscape-undo-redo ^1.0.10 (optional)
 
 
