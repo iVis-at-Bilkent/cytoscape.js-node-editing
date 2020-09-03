@@ -393,7 +393,9 @@
               for one of these extensions for no reason.
             */
             var $container = $(cy.container());
+            stageId++;
             var canvasElementId = 'cy-node-edge-editing-stage';
+
             var $canvasElement = $('<div id="' + canvasElementId + '"></div>');
             if ($container.find('#' + canvasElementId).length < 1) {
               $container.append($canvasElement);
@@ -408,7 +410,7 @@
               or both of the extensions that use the stage created below will break.
             */ 
             var stage;
-            if (Konva.stages.length < 1) {
+            if (Konva.stages.length < stageId) {
               stage = new Konva.Stage({
                 id: 'node-edge-editing-stage',
                 container: canvasElementId,   // id of container <div>
@@ -417,7 +419,7 @@
               });
             }
             else {
-              stage = Konva.stages[0];
+              stage = Konva.stages[stageId - 1];
             }
             
             var canvas;
