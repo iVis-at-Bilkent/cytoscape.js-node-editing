@@ -393,10 +393,10 @@
               for one of these extensions for no reason.
             */
             var $container = $(cy.container());
+            var canvasElementId = 'cy-node-edge-editing-stage' + stageId;
             stageId++;
-            var canvasElementId = 'cy-node-edge-editing-stage';
-
             var $canvasElement = $('<div id="' + canvasElementId + '"></div>');
+            // If canvas element not already created create it
             if ($container.find('#' + canvasElementId).length < 1) {
               $container.append($canvasElement);
             }
