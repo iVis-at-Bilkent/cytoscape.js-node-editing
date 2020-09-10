@@ -1,5 +1,5 @@
 {
-  "name": "cytoscape-node-resize",
+  "name": "cytoscape-node-editing",
   "version": "3.2.2",
   "description": "",
   "main": "cytoscape-node-editing.js",
