@@ -348,17 +348,17 @@
               },
               resizeToContentFunction: undefined,
               resizeToContentCuePosition: 'bottom-right',
-              resizeToContentCueImage: '/node_modules/cytoscape-node-resize/resizeCue.svg',
+              resizeToContentCueImage: '/node_modules/cytoscape-node-editing/resizeCue.svg',
           };
         }
 
         // Get the whole scratchpad reserved for this extension (on an element or core) or get a single property of it
         function getScratch (cyOrEle, name) {
-          if (cyOrEle.scratch('_cyNodeResize') === undefined) {
-            cyOrEle.scratch('_cyNodeResize', {});
+          if (cyOrEle.scratch('_cyNodeEditing') === undefined) {
+            cyOrEle.scratch('_cyNodeEditing', {});
           }
 
-          var scratch = cyOrEle.scratch('_cyNodeResize');
+          var scratch = cyOrEle.scratch('_cyNodeEditing');
           var retVal = ( name === undefined ) ? scratch : scratch[name];
           return retVal;
         }
@@ -368,7 +368,7 @@
           getScratch(cyOrEle)[name] = val;
         }
 
-        cytoscape('core', 'nodeResize', function (opts) {
+        cytoscape('core', 'nodeEditing', function (opts) {
 
             var cy = this;
 
@@ -383,25 +383,54 @@
 
             // Events to bind and unbind
             var eUnselectNode, ePositionNode, eZoom, ePan, eSelectNode, eRemoveNode, eAddNode, eFreeNode, eUndoRedo;
-
             var options = $.extend(true, defaults(), opts);
 
-            var canvasElementId = 'cy-node-resize' + stageId;
-            stageId++;
-
-            var $canvasElement = $('<div id="' + canvasElementId + '"></div>');
+            /*
+              Make sure we don't append an element that already exists.
+              This extension canvas uses the same html element as edge-editing.
+              It makes sense since it also uses the same Konva stage.
+              Without the below logic, an empty canvasElement would be created
+              for one of these extensions for no reason.
+            */
             var $container = $(cy.container());
-            $container.append($canvasElement);
+            var canvasElementId = 'cy-node-edge-editing-stage' + stageId;
+            stageId++;
+            var $canvasElement = $('<div id="' + canvasElementId + '"></div>');
+            // If canvas element not already created create it
+            if ($container.find('#' + canvasElementId).length < 1) {
+              $container.append($canvasElement);
+            }
 
-            var stage = new Konva.Stage({
+            /* 
+              Maintain a single Konva.stage object throughout the application that uses this extension
+              such as Newt. This is important since having different stages causes weird behavior
+              on other extensions that also use Konva, like not listening to mouse clicks and such.
+              If you are someone that is creating an extension that uses Konva in the future, you need to
+              be careful about how events register. If you use a different stage almost certainly one
+              or both of the extensions that use the stage created below will break.
+            */ 
+            var stage;
+            if (Konva.stages.length < stageId) {
+              stage = new Konva.Stage({
+                id: 'node-edge-editing-stage',
                 container: canvasElementId,   // id of container <div>
                 width: $container.width(),
                 height: $container.height()
-            });
-            // then create layer
-            var canvas = new Konva.Layer();
-            // add the layer to the stage
-            stage.add(canvas);
+              });
+            }
+            else {
+              stage = Konva.stages[stageId - 1];
+            }
+            
+            var canvas;
+            if (stage.getChildren().length < 1) {
+              canvas = new Konva.Layer();
+              stage.add(canvas);
+            }
+            else {
+              canvas = stage.getChildren()[0];
+            }
+            
 
             // Resize the canvas
             var sizeCanvas = debounce( function(){
@@ -664,7 +693,7 @@
                       return node.height();
                     };
                     
-                    cy.trigger("noderesize.resizestart", [self.location, self.parent]);
+                    cy.trigger("nodeediting.resizestart", [self.location, self.parent]);
                     if(cy.style()._private.coreStyle["active-bg-opacity"]){
                         tmpActiveBgOpacity = cy.style()._private.coreStyle["active-bg-opacity"].value;
                     }
@@ -698,7 +727,7 @@
                         cy.autounselectify(false); // think about those 2
                         cy.autoungrabify(false);
                     }, 0);
-                    cy.trigger("noderesize.resizeend", [self.location, self.parent]);
+                    cy.trigger("nodeediting.resizeend", [self.location, self.parent]);
                     canvas.getStage().off("contentTouchend contentMouseup", eMouseUp);
                     canvas.getStage().off("contentTouchmove contentMousemove", eMouseMove);
                     self.shape.on("mouseenter", eMouseEnter);
@@ -865,7 +894,7 @@
                     startPos.y = y;
                     self.resizeControls.update(); // redundant update if the position has changed just before
 
-                    cy.trigger("noderesize.resizedrag", [location, node]);
+                    cy.trigger("nodeediting.resizedrag", [location, node]);
                 };
 
                 var eMouseEnter = function (event) {
@@ -1020,7 +1049,7 @@
                         options.resizeToContentFunction([node]);
                     }
                     else if(cy.undoRedo && options.undoable)
-                        cy.trigger('noderesize.resizetocontent', [self]);
+                        cy.trigger('nodeediting.resizetocontent', [self]);
                     else{
                         var params = {
                             self: self,
@@ -1152,29 +1181,37 @@
                 var nodesToMove = topMostNodes.union(topMostNodes.descendants());
 
                 nodesToMove.positions(function(node, i) {
-                    if(typeof node === "number") {
-                        node = i;
-                    }
-                    var oldX = node.position("x");
-                    var oldY = node.position("y");
-                    if (node.isParent())
-                    {
-                        return {
-                            x: oldX,
-                            y: oldY
-                        };
-                    }
-                    return {
-                        x: oldX + positionDiff.x,
-                        y: oldY + positionDiff.y
-                    };
-                });
+                  if(typeof node === "number") {
+                      node = i;
+                  }
+                  var oldX = node.position("x");
+                  var oldY = node.position("y");
+                  if (node.isParent())
+                  {
+                      return {
+                          x: oldX,
+                          y: oldY
+                      };
+                  }
+                  return {
+                      x: oldX + positionDiff.x,
+                      y: oldY + positionDiff.y
+                  };
+              });
             }
 
             var selectedNodesToMove;
             var nodesMoving = false;
 
-            var keys = {};
+            // track arrow key presses, default false
+            // event.keyCode normally returns number
+            // but JS will convert to string anyway
+            var keys = {
+              '37': false,
+              '38': false,
+              '39': false,
+              '40': false
+            };
             function keyDown(e) {
 
                 var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
@@ -1188,75 +1225,51 @@
                 var tn = document.activeElement.tagName;
                 if (tn != "TEXTAREA" && tn != "INPUT")
                 {
-                    keys[e.keyCode] = true;
                     switch(e.keyCode){
                         case 37: case 39: case 38:  case 40: // Arrow keys
                         case 32: e.preventDefault(); break; // Space
                         default: break; // do not block other keys
                     }
-
-					
-                    if (e.keyCode < '37' || e.keyCode > '40') {
+                    if (e.keyCode < 37 || e.keyCode > 40) {
                         return;
                     }
+                    keys[e.keyCode] = true;
+                    e.preventDefault();
 
                     if (!nodesMoving)
                     {
                         selectedNodesToMove = cy.nodes(':selected');
-                        cy.trigger("noderesize.movestart", [selectedNodesToMove]);
+                        cy.trigger("nodeediting.movestart", [selectedNodesToMove]);
                         nodesMoving = true;
                     }
-                    if (e.altKey && e.which == '38') {
-                        // up arrow and alt
-                        moveNodes ({x:0, y:-1},selectedNodesToMove);
+
+                    var moveSpeed = 3;
+                    
+                    // doesn't make sense if alt and shift both pressed
+                    if(e.altKey && e.shiftKey) {
+                      return;
                     }
-                    else if (e.altKey && e.which == '40') {
-                        // down arrow and alt
-                        moveNodes ({x:0, y:1},selectedNodesToMove);
+                    else if (e.altKey) {
+                      moveSpeed = 1;
                     }
-                    else if (e.altKey && e.which == '37') {
-                        // left arrow and alt
-                        moveNodes ({x:-1, y:0},selectedNodesToMove);
-                    }
-                    else if (e.altKey && e.which == '39') {
-                        // right arrow and alt
-                        moveNodes ({x:1, y:0},selectedNodesToMove);
+                    else if (e.shiftKey) {
+                      moveSpeed = 10;
                     }
 
-                    else if (e.shiftKey && e.which == '38') {
-                        // up arrow and shift
-                        moveNodes ({x:0, y:-10},selectedNodesToMove);
-                    }
-                    else if (e.shiftKey && e.which == '40') {
-                        // down arrow and shift
-                        moveNodes ({x:0, y:10},selectedNodesToMove);
-                    }
-                    else if (e.shiftKey && e.which == '37') {
-                        // left arrow and shift
-                        moveNodes ({x:-10, y:0},selectedNodesToMove);
+                    var upArrowCode = 38;
+                    var downArrowCode = 40;
+                    var leftArrowCode = 37;
+                    var rightArrowCode = 39;
 
-                    }
-                    else if (e.shiftKey && e.which == '39' ) {
-                        // right arrow and shift
-                        moveNodes ({x:10, y:0},selectedNodesToMove);
-                    }
+                    var dx = 0;
+                    var dy = 0;
 
-                    else if (e.keyCode == '38') {
-                        // up arrow
-                        moveNodes ({x:0, y:-3},selectedNodesToMove);
-                    }
-                    else if (e.keyCode == '40') {
-                        // down arrow
-                        moveNodes ({x:0, y:3},selectedNodesToMove);
-                    }
-                    else if (e.keyCode == '37') {
-                        // left arrow
-                        moveNodes ({x:-3, y:0},selectedNodesToMove);
-                    }
-                    else if (e.keyCode == '39') {
-                        //right arrow
-                        moveNodes ({x:3, y:0},selectedNodesToMove);
-                    }
+                    dx += keys[rightArrowCode] ? moveSpeed : 0;
+                    dx -= keys[leftArrowCode] ? moveSpeed : 0;
+                    dy += keys[downArrowCode] ? moveSpeed : 0;
+                    dy -= keys[upArrowCode] ? moveSpeed : 0;
+
+                    moveNodes({x:dx, y:dy}, selectedNodesToMove);
                 }
             }
 
@@ -1264,6 +1277,8 @@
                 if (e.keyCode < '37' || e.keyCode > '40') {
                     return;
                 }
+                e.preventDefault();
+                keys[e.keyCode] = false;
 
                 var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
                         ? options.moveSelectedNodesOnKeyEvents() : options.moveSelectedNodesOnKeyEvents;
@@ -1272,7 +1287,7 @@
                   return;
                 }
 
-                cy.trigger("noderesize.moveend", [selectedNodesToMove]);
+                cy.trigger("nodeediting.moveend", [selectedNodesToMove]);
                 selectedNodesToMove = undefined;
                 nodesMoving = false;
             }
@@ -1391,7 +1406,7 @@
                 var moveparam;
                 
                 // On resize start fill param object to use it on undo/redo
-                cy.on("noderesize.resizestart", function (e, type, node) {
+                cy.on("nodeediting.resizestart", function (e, type, node) {
                     param = {
                         node: node,
                         css: {
@@ -1415,13 +1430,13 @@
                 });
                 
                 // On resize end do the action using param object
-                cy.on("noderesize.resizeend", function (e, type, node) {
+                cy.on("nodeediting.resizeend", function (e, type, node) {
                     param.firstTime = true;
                     cy.undoRedo().do("resize", param);
                     param = undefined;
                 });
 
-                cy.on("noderesize.movestart", function (e, nodes) {
+                cy.on("nodeediting.movestart", function (e, nodes) {
                     if (nodes[0] != undefined)
                     {
                         moveparam = {
@@ -1435,7 +1450,7 @@
                     }
                 });
 
-                cy.on("noderesize.moveend", function (e, nodes) {
+                cy.on("nodeediting.moveend", function (e, nodes) {
                     if (moveparam != undefined)
                     {
                         var initialPos = moveparam.firstNodePosition;
@@ -1447,12 +1462,12 @@
 
                         delete moveparam.firstNodePosition;
 
-                        cy.undoRedo().do("noderesize.move", moveparam);
+                        cy.undoRedo().do("nodeediting.move", moveparam);
                         moveparam = undefined;
                     }
                 });
 
-                cy.on("noderesize.resizetocontent", function (e, self) {
+                cy.on("nodeediting.resizetocontent", function (e, self) {
                     var params = {
                         self: self,
                         firstTime: true
@@ -1547,7 +1562,7 @@
                 };
 
                 cy.undoRedo().action("resize", resizeDo, resizeDo);
-                cy.undoRedo().action("noderesize.move", moveDo, moveDo);
+                cy.undoRedo().action("nodeediting.move", moveDo, moveDo);
                 cy.undoRedo().action("resizeToContent", defaultResizeToContent, defaultResizeToContent);
             }
 
@@ -1582,7 +1597,7 @@
     }
 
     if (typeof define !== 'undefined' && define.amd) { // expose as an amd/requirejs module
-        define('cytoscape-node-resize', function () {
+        define('cytoscape-node-editing', function () {
             return register;
         });
     }

@@ -3,7 +3,7 @@
 <html>
 
 	<head>
-		<title>cytoscape-node-resize.js demo</title>
+		<title>cytoscape-node-editing.js demo</title>
 
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
@@ -15,7 +15,7 @@
 		<!-- for testing with local version of cytoscape.js -->
 		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
 
-		<script src="cytoscape-node-resize.js"></script>
+		<script src="cytoscape-node-editing.js"></script>
 
 		<style>
 			body {
@@ -91,16 +91,16 @@
 					}
 				});
 
-				cy.nodeResize({
+				cy.nodeEditing({
 					undoable: true,
 					resizeToContentCueImage: 'resizeCue.svg'
 				});
 
-				cy.on("noderesize.resizestart", function (e, type) {
+				cy.on("nodeediting.resizestart", function (e, type) {
 					console.log(type);
 				});
 
-				cy.on("noderesize.resizeend", function (e, type) {
+				cy.on("nodeediting.resizeend", function (e, type) {
 					document.body.style.cursor = 'initial';
 				});
 				document.addEventListener('keydown', function (e){
@@ -118,7 +118,7 @@
 	</head>
 
 	<body>
-		<h1>cytoscape-node-resize demo</h1>
+		<h1>cytoscape-node-editing demo</h1>
 
 		<div id="cy"></div>
 

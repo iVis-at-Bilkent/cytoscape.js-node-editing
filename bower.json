@@ -1,10 +1,10 @@
 {
-  "name": "cytoscape-node-resize",
+  "name": "cytoscape-node-editing",
   "description": "",
-  "main": "cytoscape-node-resize.js",
+  "main": "cytoscape-node-editing.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-resize.git"
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing.git"
   },
   "ignore": [
     "**/.*",
