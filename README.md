@@ -1,6 +1,7 @@
 cytoscape-node-resize
 ================================================================================
 
+This package is deprecated in favor of package **cytoscape-node-editing**.
 
 ## Description
 A Cytoscape.js extension to provide grapples to resize nodes and a visual cue to resize node to its label, distributed under [The MIT License](https://opensource.org/licenses/MIT).
