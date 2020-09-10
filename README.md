@@ -16,7 +16,7 @@ U. Dogrusoz , A. Karacelik, I. Safarli, H. Balci, L. Dervishi, and M.C. Siper, "
 
 ## Demo
 
-Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/demo.html) (simple) or [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/demo.html) (undoable) for demos
+Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/demo.html) (simple) or [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/undoable_demo.html) (undoable) for demos
 
 ## Default Options
 
