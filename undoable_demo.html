@@ -93,7 +93,10 @@
 
 				cy.nodeEditing({
 					undoable: true,
-					resizeToContentCueImage: 'resizeCue.svg'
+					resizeToContentCueImage: 'resizeCue.svg',
+					isNoResizeMode: function (node) {
+						return node.is(".noResizeMode");
+					},
 				});
 
 				cy.on("nodeediting.resizestart", function (e, type) {

@@ -1044,7 +1044,13 @@
                 var node = this.parent;
                 var self = this;
 
-                var onClick = function() {
+                // Konva uses its own event object, original event is stored in event.evt
+                var onMouseDown = function(event) {
+                    event.evt.preventDefault();
+                    event.evt.stopPropagation();
+                };
+                var onClick = function(event) {
+                    event.evt.preventDefault();
                     if(typeof options.resizeToContentFunction === "function"){
                         options.resizeToContentFunction([node]);
                     }
@@ -1057,12 +1063,14 @@
                         }
                         defaultResizeToContent(params);                    
                     }
-                }
+                };
 
+                this.shape.on("mousedown", onMouseDown);
                 this.shape.on("click", onClick);
             };
 
             ResizeCue.prototype.unbindEvents = function () {
+                this.shape.off("mousedown");
                 this.shape.off("click");
             };
 
@@ -1091,7 +1099,7 @@
                 var setHeightFcn = node.isParent() ? options.setCompoundMinHeight : options.setHeight; 
                 
                 if(params.firstTime){
-                    delete params.firstTime;
+                    params.firstTime = null;
                     
                     params.oldWidth = node.width();
                     params.oldHeight = node.height();
@@ -1295,10 +1303,8 @@
             var unBindEvents = function() {
                 cy.off("unselect", "node", eUnselectNode);
                 cy.off("position", "node", ePositionNode);
-                cy.off("position", "node", eFreeNode);
                 cy.off("zoom", eZoom);
                 cy.off("pan", ePan);
-                //cy.off("style", "node", redraw);
                 cy.off("select", "node", eSelectNode);
                 cy.off("remove", "node", eRemoveNode);
                 cy.off("add", "node", eAddNode);
