@@ -91,7 +91,9 @@ Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/demo.ht
                     s: "s-resize",
                     sw: "sw-resize",
                     w: "w-resize"
-                }
+                },
+                
+                moveWithArrowKeys: true,
 
                 // enable resize content cue according to the node
                 resizeToContentCueEnabled: function (node) {

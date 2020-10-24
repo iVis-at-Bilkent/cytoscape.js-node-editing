@@ -343,6 +343,8 @@
                   w: "w-resize"
               },
 
+              moveWithArrowKeys: true,
+
               resizeToContentCueEnabled: function (node) {
                   return true;
               },
@@ -1395,8 +1397,10 @@
                     }
                 });
 
-                document.addEventListener("keydown",keyDown, true);
-                document.addEventListener("keyup",keyUp, true);
+                if (options.moveWithArrowKeys) {
+                    document.addEventListener("keydown",keyDown, true);
+                    document.addEventListener("keyup",keyUp, true);
+                }
             };
             bindEvents();
 
