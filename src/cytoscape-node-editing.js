@@ -1043,7 +1043,18 @@
             ResizeCue.prototype.bindEvents = function () {
                 var node = this.parent;
                 var self = this;
+                /* 
+                    This listener is here because undo-redo extension will pick up a 'grab'
+                    event and later, on mouse up, it will pick up a 'free' event and it
+                    registers 'grab then free' as drag event, but there is no dragging here.
 
+                    'grab' is fired same time as mousedown event, we need to stop it from
+                    propagating down in z-index to the drag layer which is below our Konva
+                    layer.
+
+                    Above problem breaks some undo-redo actions, 
+                    see: https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing/issues/36
+                */
                 // Konva uses its own event object, original event is stored in event.evt
                 var onMouseDown = function(event) {
                     event.evt.preventDefault();
@@ -1051,6 +1062,7 @@
                 };
                 var onClick = function(event) {
                     event.evt.preventDefault();
+                    
                     if(typeof options.resizeToContentFunction === "function"){
                         options.resizeToContentFunction([node]);
                     }
@@ -1096,13 +1108,13 @@
                 var node = self.parent;
                 
                 var setWidthFcn = node.isParent() ? options.setCompoundMinWidth : options.setWidth; 
-                var setHeightFcn = node.isParent() ? options.setCompoundMinHeight : options.setHeight; 
+                var setHeightFcn = node.isParent() ? options.setCompoundMinHeight : options.setHeight;
                 
                 if(params.firstTime){
                     params.firstTime = null;
                     
-                    params.oldWidth = node.width();
-                    params.oldHeight = node.height();
+                    params.oldWidth = node.isParent() ? options.getCompoundMinWidth(node) : node.width();
+                    params.oldHeight = node.isParent() ? options.getCompoundMinHeight(node) : node.height();
 
                     var context = document.createElement('canvas').getContext("2d");
                     var style = node.style();
@@ -1148,8 +1160,8 @@
                     var newWidth = params.oldWidth;
                     var newHeight = params.oldHeight;
                     
-                    params.oldWidth = node.width();
-                    params.oldHeight = node.height();
+                    params.oldWidth = node.isParent() ? options.getCompoundMinWidth(node) : node.width();
+                    params.oldHeight = node.isParent() ? options.getCompoundMinHeight(node) : node.height();
 
                     setWidthFcn(node, newWidth);
                     setHeightFcn(node, newHeight);
