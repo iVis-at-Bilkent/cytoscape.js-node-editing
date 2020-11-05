@@ -501,7 +501,7 @@
                 };
 
                 var node = this.boundingRectangle.parent;
-                var rcEnabled = options.resizeToContentCueEnabled(node);
+                var rcEnabled = options.resizeToContentCueEnabled(node) && !options.isNoResizeMode(node);
 
                 if(this.resizeCue && rcEnabled)
                     this.resizeCue.update();
