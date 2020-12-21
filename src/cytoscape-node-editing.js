@@ -349,6 +349,7 @@
               resizeToContentFunction: undefined,
               resizeToContentCuePosition: 'bottom-right',
               resizeToContentCueImage: '/node_modules/cytoscape-node-editing/resizeCue.svg',
+              enableMovementWithArrowKeys: true,
           };
         }
 
@@ -1232,7 +1233,7 @@
               '39': false,
               '40': false
             };
-            function keyDown(e) {
+            function arrowKeyDownListener(e) {
 
                 var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
                         ? options.moveSelectedNodesOnKeyEvents() : options.moveSelectedNodesOnKeyEvents;
@@ -1293,7 +1294,7 @@
                 }
             }
 
-            function keyUp(e) {
+            function arrowKeyUpListener(e) {
                 if (e.keyCode < '37' || e.keyCode > '40') {
                     return;
                 }
@@ -1413,8 +1414,10 @@
                     }
                 });
 
-                document.addEventListener("keydown",keyDown, true);
-                document.addEventListener("keyup",keyUp, true);
+                if (options.enableMovementWithArrowKeys) {
+                    document.addEventListener("keydown", arrowKeyDownListener, true);
+                    document.addEventListener("keyup", arrowKeyUpListener, true);
+                }
             };
             bindEvents();
 
