@@ -350,6 +350,7 @@
               resizeToContentCuePosition: 'bottom-right',
               resizeToContentCueImage: '/node_modules/cytoscape-node-editing/resizeCue.svg',
               enableMovementWithArrowKeys: true,
+              autoRemoveResizeToContentCue: false,
           };
         }
 
@@ -381,6 +382,8 @@
             // the controls object represents the grapples and bounding rectangle
             // only one can exist at any time
             var controls;
+
+            const resizeToContentSizeMultiplier = 1.1;
 
             // Events to bind and unbind
             var eUnselectNode, ePositionNode, eZoom, ePan, eSelectNode, eRemoveNode, eAddNode, eFreeNode, eUndoRedo;
@@ -489,7 +492,11 @@
                     this.grapples.push(new Grapple(node, this, location, isActive))
                 };
 
-                if(options.resizeToContentCueEnabled(node) && !options.isNoResizeMode(node))
+                if(options.resizeToContentCueEnabled(node) && 
+                    !options.isNoResizeMode(node) && 
+                    (!options.autoRemoveResizeToContentCue ||
+                    (options.autoRemoveResizeToContentCue && !isResizedToContent(node))))
+
                     this.resizeCue = new ResizeCue(node, this);
                 
                 canvas.draw();
@@ -502,7 +509,10 @@
                 };
 
                 var node = this.boundingRectangle.parent;
-                var rcEnabled = options.resizeToContentCueEnabled(node) && !options.isNoResizeMode(node);
+                var rcEnabled = options.resizeToContentCueEnabled(node) && 
+                                !options.isNoResizeMode(node) &&
+                                (!options.autoRemoveResizeToContentCue ||
+                                (options.autoRemoveResizeToContentCue && !isResizedToContent(node)));
 
                 if(this.resizeCue && rcEnabled)
                     this.resizeCue.update();
@@ -1087,6 +1097,63 @@
                 this.shape.off("click");
             };
 
+            var getMinHeight = function (node) {
+                if (node.isParent()) {
+                    return node.children().boundingBox().h;
+                }
+                var context = document.createElement('canvas').getContext("2d");
+                var style = node.style();
+                context.font = style['font-size'] + " " + style['font-family'];
+
+                return Math.max(context.measureText('M').width * 1.1, 30);
+            }
+
+            var getMinWidth = function(node) {
+                if (node.isParent()) {
+                    return node.children().boundingBox().w;
+                }
+                var context = document.createElement('canvas').getContext("2d");
+                var style = node.style();
+                context.font = style['font-size'] + " " + style['font-family'];
+                const labelText = (style['label']).split("\n");
+                let minWidth = 0;
+                labelText.forEach(function(text){
+                    var textWidth = context.measureText(text).width;
+                    if (minWidth < textWidth)
+                        minWidth = textWidth;
+                });
+                return minWidth;
+            }
+
+            var isResizedToContent = function (node) {
+                const width = node.width();
+                const height = node.height();
+
+                let minHeight = getMinHeight(node);
+                let minWidth = getMinWidth(node);
+
+                if(minWidth !== 0){
+                    if(typeof options.isFixedAspectRatioResizeMode === 'function' && 
+                        options.isFixedAspectRatioResizeMode(node)){
+                        
+                        var ratio = node.width() / node.height();
+                        var tmpW = (minWidth < minHeight) ? minWidth : minHeight * ratio;
+                        var tmpH = (minWidth < minHeight) ? minWidth / ratio : minHeight;
+
+                        if(tmpW >= minWidth && tmpH >= minHeight){
+                            minWidth = tmpW;
+                            minHeight = tmpH;
+                        }
+                        else{
+                            minWidth = (minWidth < minHeight) ? minHeight * ratio : minWidth;
+                            minHeight = (minWidth < minHeight) ? minHeight : minWidth / ratio;
+                        }
+                    }
+                }
+
+                return width === (minWidth * resizeToContentSizeMultiplier) && height === (minHeight * resizeToContentSizeMultiplier);
+            };
+
             var getGrappleSize = function (node) {
                 return Math.max(1, cy.zoom()) * options.grappleSize * Math.min(node.width()/25, node.height()/25, 1);
             };
@@ -1117,19 +1184,8 @@
                     params.oldWidth = node.isParent() ? options.getCompoundMinWidth(node) : node.width();
                     params.oldHeight = node.isParent() ? options.getCompoundMinHeight(node) : node.height();
 
-                    var context = document.createElement('canvas').getContext("2d");
-                    var style = node.style();
-                    context.font = style['font-size'] + " " + style['font-family'];
-    
-                    var labelText = (style['label']).split("\n");
-    
-                    var minWidth = 0;
-                    var minHeight = Math.max(context.measureText('M').width * 1.1, 30);
-                    labelText.forEach(function(text){
-                        var textWidth = context.measureText(text).width;
-                        if (minWidth < textWidth)
-                            minWidth = textWidth;
-                    });
+                    var minWidth = getMinWidth(node);
+                    var minHeight = getMinHeight(node);
     
                     if(minWidth !== 0){
                         if(typeof options.isFixedAspectRatioResizeMode === 'function' && 
@@ -1149,12 +1205,12 @@
                             }
                         }
 
-                        setWidthFcn(node, minWidth * 1.1);
-                        setHeightFcn(node, minHeight * 1.1);
+                        setWidthFcn(node, minWidth * resizeToContentSizeMultiplier);
+                        setHeightFcn(node, minHeight * resizeToContentSizeMultiplier);
                     }
                     
-                    node.unselect();
-
+                    if (controls)
+                        controls.update();
                     return params;
                 }
                 else{  
@@ -1167,11 +1223,10 @@
                     setWidthFcn(node, newWidth);
                     setHeightFcn(node, newHeight);
     
-                    node.unselect();
-
+                    if (controls)
+                        controls.update();
                     return params;
                 }
-                
             }
 
             function getTopMostNodes(nodes) {

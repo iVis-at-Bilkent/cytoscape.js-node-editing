@@ -91,6 +91,7 @@
 
 				cy.nodeEditing({
 					resizeToContentCueImage: 'resizeCue.svg',
+					autoRemoveResizeToContentCue: true,
 				});
 
 				cy.on("nodeediting.resizestart", function (e, type) {

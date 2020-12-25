@@ -106,6 +106,7 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/u
                 // relative path of the resize to content cue image
                 resizeToContentCueImage: '/node_modules/cytoscape-node-editing/resizeCue.svg',
                 enableMovementWithArrowKeys: true,
+                autoRemoveResizeToContentCue: false,
              });
 ```
 
