@@ -1207,6 +1207,12 @@
 
                         setWidthFcn(node, minWidth * resizeToContentSizeMultiplier);
                         setHeightFcn(node, minHeight * resizeToContentSizeMultiplier);
+                        if (node.isParent()) {
+                            options.setCompoundMinWidthBiasLeft(node, '50%');
+                            options.setCompoundMinWidthBiasRight(node, '50%');
+                            options.setCompoundMinHeightBiasTop(node, '50%');
+                            options.setCompoundMinHeightBiasBottom(node, '50%');
+                        }
                     }
                     
                     if (controls)
