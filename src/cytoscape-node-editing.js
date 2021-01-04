@@ -1178,11 +1178,17 @@
                 var setWidthFcn = node.isParent() ? options.setCompoundMinWidth : options.setWidth; 
                 var setHeightFcn = node.isParent() ? options.setCompoundMinHeight : options.setHeight;
                 
-                if(params.firstTime){
+                if (params.firstTime) {
                     params.firstTime = null;
                     
                     params.oldWidth = node.isParent() ? options.getCompoundMinWidth(node) : node.width();
                     params.oldHeight = node.isParent() ? options.getCompoundMinHeight(node) : node.height();
+                    if (node.isParent()) {
+                        params.oldBiasLeft = options.getCompoundMinWidthBiasLeft(node) || '50%';
+                        params.oldBiasRight = options.getCompoundMinWidthBiasRight(node) || '50%';
+                        params.oldBiasTop = options.getCompoundMinHeightBiasTop(node) || '50%';
+                        params.oldBiasBottom = options.getCompoundMinHeightBiasBottom(node) || '50%';
+                    }
 
                     var minWidth = getMinWidth(node);
                     var minHeight = getMinHeight(node);
@@ -1219,7 +1225,7 @@
                         controls.update();
                     return params;
                 }
-                else{  
+                else {  
                     var newWidth = params.oldWidth;
                     var newHeight = params.oldHeight;
                     
@@ -1228,6 +1234,24 @@
 
                     setWidthFcn(node, newWidth);
                     setHeightFcn(node, newHeight);
+
+                    if (node.isParent()) {
+                        var newBiasLeft = params.oldBiasLeft || '50%';
+                        var newBiasRight = params.oldBiasRight || '50%';
+                        var newBiasTop = params.oldBiasTop || '50%';
+                        var newBiasBottom = params.oldBiasBottom || '50%';
+                        
+                        params.oldBiasLeft = options.getCompoundMinWidthBiasLeft(node) || '50%';
+                        params.oldBiasRight = options.getCompoundMinWidthBiasRight(node) || '50%';
+                        params.oldBiasTop = options.getCompoundMinHeightBiasTop(node) || '50%';
+                        params.oldBiasBottom = options.getCompoundMinHeightBiasBottom(node) || '50%';
+
+                        options.setCompoundMinWidthBiasLeft(node, newBiasLeft);
+                        options.setCompoundMinWidthBiasRight(node, newBiasRight);
+                        options.setCompoundMinHeightBiasTop(node, newBiasTop);
+                        options.setCompoundMinHeightBiasBottom(node, newBiasBottom);
+                        
+                    }
     
                     if (controls)
                         controls.update();
