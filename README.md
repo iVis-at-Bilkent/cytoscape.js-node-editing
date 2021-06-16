@@ -105,6 +105,8 @@ Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/demo.ht
                 resizeToContentCuePosition: 'bottom-right',
                 // relative path of the resize to content cue image
                 resizeToContentCueImage: '/node_modules/cytoscape-node-editing/resizeCue.svg',
+                enableMovementWithArrowKeys: true,
+                autoRemoveResizeToContentCue: false,
              });
 ```
 

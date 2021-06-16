@@ -349,6 +349,8 @@
               resizeToContentFunction: undefined,
               resizeToContentCuePosition: 'bottom-right',
               resizeToContentCueImage: '/node_modules/cytoscape-node-editing/resizeCue.svg',
+              enableMovementWithArrowKeys: true,
+              autoRemoveResizeToContentCue: false,
           };
         }
 
@@ -380,6 +382,8 @@
             // the controls object represents the grapples and bounding rectangle
             // only one can exist at any time
             var controls;
+
+            const resizeToContentSizeMultiplier = 1.1;
 
             // Events to bind and unbind
             var eUnselectNode, ePositionNode, eZoom, ePan, eSelectNode, eRemoveNode, eAddNode, eFreeNode, eUndoRedo;
@@ -488,7 +492,11 @@
                     this.grapples.push(new Grapple(node, this, location, isActive))
                 };
 
-                if(options.resizeToContentCueEnabled(node) && !options.isNoResizeMode(node))
+                if(options.resizeToContentCueEnabled(node) && 
+                    !options.isNoResizeMode(node) && 
+                    (!options.autoRemoveResizeToContentCue ||
+                    (options.autoRemoveResizeToContentCue && !isResizedToContent(node))))
+
                     this.resizeCue = new ResizeCue(node, this);
                 
                 canvas.draw();
@@ -501,7 +509,10 @@
                 };
 
                 var node = this.boundingRectangle.parent;
-                var rcEnabled = options.resizeToContentCueEnabled(node);
+                var rcEnabled = options.resizeToContentCueEnabled(node) && 
+                                !options.isNoResizeMode(node) &&
+                                (!options.autoRemoveResizeToContentCue ||
+                                (options.autoRemoveResizeToContentCue && !isResizedToContent(node)));
 
                 if(this.resizeCue && rcEnabled)
                     this.resizeCue.update();
@@ -1043,8 +1054,26 @@
             ResizeCue.prototype.bindEvents = function () {
                 var node = this.parent;
                 var self = this;
+                /* 
+                    This listener is here because undo-redo extension will pick up a 'grab'
+                    event and later, on mouse up, it will pick up a 'free' event and it
+                    registers 'grab then free' as drag event, but there is no dragging here.
 
-                var onClick = function() {
+                    'grab' is fired same time as mousedown event, we need to stop it from
+                    propagating down in z-index to the drag layer which is below our Konva
+                    layer.
+
+                    Above problem breaks some undo-redo actions, 
+                    see: https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing/issues/36
+                */
+                // Konva uses its own event object, original event is stored in event.evt
+                var onMouseDown = function(event) {
+                    event.evt.preventDefault();
+                    event.evt.stopPropagation();
+                };
+                var onClick = function(event) {
+                    event.evt.preventDefault();
+                    
                     if(typeof options.resizeToContentFunction === "function"){
                         options.resizeToContentFunction([node]);
                     }
@@ -1057,13 +1086,72 @@
                         }
                         defaultResizeToContent(params);                    
                     }
-                }
+                };
 
+                this.shape.on("mousedown", onMouseDown);
                 this.shape.on("click", onClick);
             };
 
             ResizeCue.prototype.unbindEvents = function () {
+                this.shape.off("mousedown");
                 this.shape.off("click");
+            };
+
+            var getMinHeight = function (node) {
+                if (node.isParent()) {
+                    return node.children().boundingBox().h;
+                }
+                var context = document.createElement('canvas').getContext("2d");
+                var style = node.style();
+                context.font = style['font-size'] + " " + style['font-family'];
+
+                return Math.max(context.measureText('M').width * 1.1, 30);
+            }
+
+            var getMinWidth = function(node) {
+                if (node.isParent()) {
+                    return node.children().boundingBox().w;
+                }
+                var context = document.createElement('canvas').getContext("2d");
+                var style = node.style();
+                context.font = style['font-size'] + " " + style['font-family'];
+                const labelText = (style['label']).split("\n");
+                let minWidth = 0;
+                labelText.forEach(function(text){
+                    var textWidth = context.measureText(text).width;
+                    if (minWidth < textWidth)
+                        minWidth = textWidth;
+                });
+                return minWidth;
+            }
+
+            var isResizedToContent = function (node) {
+                const width = node.width();
+                const height = node.height();
+
+                let minHeight = getMinHeight(node);
+                let minWidth = getMinWidth(node);
+
+                if(minWidth !== 0){
+                    if(typeof options.isFixedAspectRatioResizeMode === 'function' && 
+                        options.isFixedAspectRatioResizeMode(node)){
+                        
+                        var ratio = node.width() / node.height();
+                        var tmpW = (minWidth < minHeight) ? minWidth : minHeight * ratio;
+                        var tmpH = (minWidth < minHeight) ? minWidth / ratio : minHeight;
+
+                        if(tmpW >= minWidth && tmpH >= minHeight){
+                            minWidth = tmpW;
+                            minHeight = tmpH;
+                        }
+                        else{
+                            minWidth = (minWidth < minHeight) ? minHeight * ratio : minWidth;
+                            minHeight = (minWidth < minHeight) ? minHeight : minWidth / ratio;
+                        }
+                    }
+                }
+
+                return width === (minWidth * resizeToContentSizeMultiplier) && height === (minHeight * resizeToContentSizeMultiplier);
             };
 
             var getGrappleSize = function (node) {
@@ -1088,27 +1176,22 @@
                 var node = self.parent;
                 
                 var setWidthFcn = node.isParent() ? options.setCompoundMinWidth : options.setWidth; 
-                var setHeightFcn = node.isParent() ? options.setCompoundMinHeight : options.setHeight; 
+                var setHeightFcn = node.isParent() ? options.setCompoundMinHeight : options.setHeight;
                 
-                if(params.firstTime){
-                    delete params.firstTime;
+                if (params.firstTime) {
+                    params.firstTime = null;
                     
-                    params.oldWidth = node.width();
-                    params.oldHeight = node.height();
+                    params.oldWidth = node.isParent() ? options.getCompoundMinWidth(node) : node.width();
+                    params.oldHeight = node.isParent() ? options.getCompoundMinHeight(node) : node.height();
+                    if (node.isParent()) {
+                        params.oldBiasLeft = options.getCompoundMinWidthBiasLeft(node) || '50%';
+                        params.oldBiasRight = options.getCompoundMinWidthBiasRight(node) || '50%';
+                        params.oldBiasTop = options.getCompoundMinHeightBiasTop(node) || '50%';
+                        params.oldBiasBottom = options.getCompoundMinHeightBiasBottom(node) || '50%';
+                    }
 
-                    var context = document.createElement('canvas').getContext("2d");
-                    var style = node.style();
-                    context.font = style['font-size'] + " " + style['font-family'];
-    
-                    var labelText = (style['label']).split("\n");
-    
-                    var minWidth = 0;
-                    var minHeight = Math.max(context.measureText('M').width * 1.1, 30);
-                    labelText.forEach(function(text){
-                        var textWidth = context.measureText(text).width;
-                        if (minWidth < textWidth)
-                            minWidth = textWidth;
-                    });
+                    var minWidth = getMinWidth(node);
+                    var minHeight = getMinHeight(node);
     
                     if(minWidth !== 0){
                         if(typeof options.isFixedAspectRatioResizeMode === 'function' && 
@@ -1128,29 +1211,52 @@
                             }
                         }
 
-                        setWidthFcn(node, minWidth * 1.1);
-                        setHeightFcn(node, minHeight * 1.1);
+                        setWidthFcn(node, minWidth * resizeToContentSizeMultiplier);
+                        setHeightFcn(node, minHeight * resizeToContentSizeMultiplier);
+                        if (node.isParent()) {
+                            options.setCompoundMinWidthBiasLeft(node, '50%');
+                            options.setCompoundMinWidthBiasRight(node, '50%');
+                            options.setCompoundMinHeightBiasTop(node, '50%');
+                            options.setCompoundMinHeightBiasBottom(node, '50%');
+                        }
                     }
                     
-                    node.unselect();
-
+                    if (controls)
+                        controls.update();
                     return params;
                 }
-                else{  
+                else {  
                     var newWidth = params.oldWidth;
                     var newHeight = params.oldHeight;
                     
-                    params.oldWidth = node.width();
-                    params.oldHeight = node.height();
+                    params.oldWidth = node.isParent() ? options.getCompoundMinWidth(node) : node.width();
+                    params.oldHeight = node.isParent() ? options.getCompoundMinHeight(node) : node.height();
 
                     setWidthFcn(node, newWidth);
                     setHeightFcn(node, newHeight);
-    
-                    node.unselect();
 
+                    if (node.isParent()) {
+                        var newBiasLeft = params.oldBiasLeft || '50%';
+                        var newBiasRight = params.oldBiasRight || '50%';
+                        var newBiasTop = params.oldBiasTop || '50%';
+                        var newBiasBottom = params.oldBiasBottom || '50%';
+                        
+                        params.oldBiasLeft = options.getCompoundMinWidthBiasLeft(node) || '50%';
+                        params.oldBiasRight = options.getCompoundMinWidthBiasRight(node) || '50%';
+                        params.oldBiasTop = options.getCompoundMinHeightBiasTop(node) || '50%';
+                        params.oldBiasBottom = options.getCompoundMinHeightBiasBottom(node) || '50%';
+
+                        options.setCompoundMinWidthBiasLeft(node, newBiasLeft);
+                        options.setCompoundMinWidthBiasRight(node, newBiasRight);
+                        options.setCompoundMinHeightBiasTop(node, newBiasTop);
+                        options.setCompoundMinHeightBiasBottom(node, newBiasBottom);
+                        
+                    }
+    
+                    if (controls)
+                        controls.update();
                     return params;
                 }
-                
             }
 
             function getTopMostNodes(nodes) {
@@ -1212,7 +1318,7 @@
               '39': false,
               '40': false
             };
-            function keyDown(e) {
+            function arrowKeyDownListener(e) {
 
                 var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
                         ? options.moveSelectedNodesOnKeyEvents() : options.moveSelectedNodesOnKeyEvents;
@@ -1273,7 +1379,7 @@
                 }
             }
 
-            function keyUp(e) {
+            function arrowKeyUpListener(e) {
                 if (e.keyCode < '37' || e.keyCode > '40') {
                     return;
                 }
@@ -1295,10 +1401,8 @@
             var unBindEvents = function() {
                 cy.off("unselect", "node", eUnselectNode);
                 cy.off("position", "node", ePositionNode);
-                cy.off("position", "node", eFreeNode);
                 cy.off("zoom", eZoom);
                 cy.off("pan", ePan);
-                //cy.off("style", "node", redraw);
                 cy.off("select", "node", eSelectNode);
                 cy.off("remove", "node", eRemoveNode);
                 cy.off("add", "node", eAddNode);
@@ -1395,8 +1499,10 @@
                     }
                 });
 
-                document.addEventListener("keydown",keyDown, true);
-                document.addEventListener("keyup",keyUp, true);
+                if (options.enableMovementWithArrowKeys) {
+                    document.addEventListener("keydown", arrowKeyDownListener, true);
+                    document.addEventListener("keyup", arrowKeyUpListener, true);
+                }
             };
             bindEvents();
 
