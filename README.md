@@ -95,7 +95,7 @@ Here are demos: **simple** and **undoable**, respectively:
                     s: "s-resize",
                     sw: "sw-resize",
                     w: "w-resize"
-                }
+                },
 
                 // enable resize content cue according to the node
                 resizeToContentCueEnabled: function (node) {
