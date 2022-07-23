@@ -342,7 +342,16 @@
                   sw: "sw-resize",
                   w: "w-resize"
               },
-
+              grappleLocations: [
+                "topleft",
+                "topcenter",
+                "topright",
+                "centerright",
+                "bottomright",
+                "bottomcenter",
+                "bottomleft",
+                "centerleft",
+              ],
               resizeToContentCueEnabled: function (node) {
                   return true;
               },
@@ -480,11 +489,10 @@
             var ResizeControls = function (node) {
                 this.parent = node;
                 this.boundingRectangle = new BoundingRectangle(node);
-                var grappleLocations = ["topleft", "topcenter", "topright", "centerright", "bottomright",
-                                  "bottomcenter", "bottomleft", "centerleft"];
+
                 this.grapples = [];
-                for(var i=0; i < grappleLocations.length; i++) {
-                    var location = grappleLocations[i];
+                for(var i=0; i < options.grappleLocations.length; i++) {
+                    var location = options.grappleLocations[i];
                     var isActive = true;
                     if (options.isNoResizeMode(node) || (options.isFixedAspectRatioResizeMode(node) && location.indexOf("center") >= 0)) {
                         isActive = false;

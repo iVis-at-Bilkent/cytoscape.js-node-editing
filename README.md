@@ -92,6 +92,16 @@ Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/demo.ht
                     sw: "sw-resize",
                     w: "w-resize"
                 },
+                grappleLocations: [ // the locations to show the grapples. Remove "topcenter" for example to avoid overlap with cytoscape.js-node-editing
+                  "topleft",
+                  "topcenter",
+                  "topright",
+                  "centerright",
+                  "bottomright",
+                  "bottomcenter",
+                  "bottomleft",
+                  "centerleft",
+                ],
 
                 // enable resize content cue according to the node
                 resizeToContentCueEnabled: function (node) {
