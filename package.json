@@ -1,40 +1,40 @@
 {
-    "name": "cytoscape-node-editing",
-    "version": "4.1.0",
-    "description": "",
-    "main": "cytoscape-node-editing.js",
-    "spm": {
-        "main": "cytoscape-node-editing.js"
-    },
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "cross-env NODE_ENV=production webpack",
-        "build:dev": "cross-env NODE_ENV=development webpack"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing.git"
-    },
-    "keywords": [
-        "cytoscape",
-        "cyext"
-    ],
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing/issues"
-    },
-    "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing",
-    "peerDependencies": {
-        "cytoscape": "^3.2.0",
-        "konva": "^7.0.3"
-    },
-    "devDependencies": {
-        "babel-core": "^6.26.3",
-        "babel-loader": "^8.2.5",
-        "babel-preset-env": "^1.7.0",
-        "camelcase": "^6.0.0",
-        "cross-env": "^7.0.3",
-        "webpack": "^5.36.1",
-        "webpack-cli": "^4.6.0"
-    }
+  "name": "cytoscape-node-editing",
+  "version": "4.1.0",
+  "description": "",
+  "main": "cytoscape-node-editing.js",
+  "spm": {
+    "main": "cytoscape-node-editing.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cross-env NODE_ENV=production webpack",
+    "build:dev": "cross-env NODE_ENV=development webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing.git"
+  },
+  "keywords": [
+    "cytoscape",
+    "cyext"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing/issues"
+  },
+  "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing",
+  "peerDependencies": {
+    "cytoscape": "^3.2.0",
+    "konva": "^7.0.3"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.2.5",
+    "babel-preset-env": "^1.7.0",
+    "camelcase": "^6.0.0",
+    "cross-env": "^7.0.3",
+    "webpack": "^5.36.1",
+    "webpack-cli": "^4.6.0"
+  }
 }
