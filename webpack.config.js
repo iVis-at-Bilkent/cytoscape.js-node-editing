@@ -21,25 +21,25 @@ let config = {
   // this mode is used in 'build' script
   mode: 'production',
   output: {
-    path: path.join( __dirname ),
+    path: path.join(__dirname),
     filename: pkg.name + '.js',
-    library: camelcase( pkg.name ),
-    libraryTarget: 'umd'
+    library: camelcase(pkg.name),
+    libraryTarget: 'umd',
   },
   // loader
   module: {
     rules: [
-      { 
-        test: /\.js$/, 
-        exclude: /node_modules/, 
-        use: 'babel-loader' 
-      }
-    ]
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: 'babel-loader',
+      },
+    ],
   },
   // minimize file if mode is production
   optimization: {
-    minimize: PROD ? true : false
-  }
+    minimize: PROD ? true : false,
+  },
 };
 
 module.exports = config;
