@@ -1204,7 +1204,7 @@
           } else {
             param.css.width = node.width();
             param.css.height = node.height();
-            param.position = assign(defaults(), node.position());
+            param.position = node.position();
           }
         });
 
@@ -1283,7 +1283,7 @@
           } else {
             result.css.width = node.width();
             result.css.height = node.height();
-            result.position = assign(defaults(), node.position());
+            result.position = node.position();
           }
 
           // Perform actual undo/redo part using args object
