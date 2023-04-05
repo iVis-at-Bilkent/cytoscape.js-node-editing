@@ -31,6 +31,9 @@ Here are demos: **simple** and **undoable**, respectively:
     
                 grappleSize: 8, // size of square dots
                 grappleColor: "green", // color of grapples
+                grappleStrokeColor: "black", // stroke color of the grapples
+                grappleStrokeWidth: 0, // stroke width of the grapples
+                grappleCornerRadius: 0, // corner radius of the grapples
                 inactiveGrappleStroke: "inside 1px blue",               
                 boundingRectangleLineDash: [4, 8], // line dash of bounding rectangle
                 boundingRectangleLineColor: "red",
