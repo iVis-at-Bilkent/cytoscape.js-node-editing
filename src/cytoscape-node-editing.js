@@ -383,8 +383,8 @@
             }
 
             // the controls object represents the grapples and bounding rectangle
-            // more than one control can exist at a time
-            var controls = [];
+            // only one can exist at any time
+            var controls;
 
             const resizeToContentSizeMultiplier = 1.1;
 
@@ -478,15 +478,11 @@
              * - 1 BoundingRectangle object
              * - 8 Grapple objects
              * 
-             * It is assumed that only one can exist at any time, and it is sorted in the global variable: controls.
+             * It is assumed that only one can exist at any time, and it is sotred in the global variable: controls.
              */
             var ResizeControls = function (node) {
                 this.parent = node;
                 this.boundingRectangle = new BoundingRectangle(node);
-
-                this.oldPos = { x: undefined, y: undefined };
-                this.currentPos = { x: 0, y: 0 };
-
                 var grappleLocations = ["topleft", "topcenter", "topright", "centerright", "bottomright",
                                   "bottomcenter", "bottomleft", "centerleft"];
                 this.grapples = [];
@@ -1231,8 +1227,8 @@
                         }
                     }
                     
-                    if (controls.length)
-                        controls.forEach(control=>{control.update()})
+                    if (controls)
+                        controls.update();
                     return params;
                 }
                 else {  
@@ -1263,8 +1259,8 @@
                         
                     }
     
-                    if (controls.length)
-                        controls.forEach(control=>{control.update()})
+                    if (controls)
+                        controls.update();
                     return params;
                 }
             }
@@ -1421,35 +1417,36 @@
 
             var bindEvents = function() {
                 // declare old and current positions
+                var oldPos = {x: undefined, y: undefined};
+                var currentPos = {x : 0, y : 0};
                 cy.on("unselect", "node", eUnselectNode = function(e) {
-                    if (controls.length) {
-                      controls.forEach(control => { control.remove() });
-                      controls = [];
+                    // reinitialize old and current compound positions
+                    oldPos = {x: undefined, y: undefined};
+                    currentPos = {x: 0, y: 0};
+
+                    if(controls) {
+                        controls.remove();
+                        controls = null;
                     }
 
                     var selectedNodes = cy.nodes(':selected');
                     if(selectedNodes.size() == 1) {
-                      selectedNodes.toArray().reverse().forEach(node => {
-                        controls.push(new ResizeControls(node))
-                      })
+                        controls = new ResizeControls(selectedNodes);
                     }
                 });
 
                 cy.on("select", "node", eSelectNode = function(e) {
                     var node = e.target;
 
-                    if (controls.length) {
-                      controls.forEach(control => { control.remove() })
-                      controls = [];
+                    if(controls) {
+                        controls.remove();
+                        controls = null;
                     }
 
                     var selectedNodes = cy.nodes(':selected');
-
-                    selectedNodes.toArray().reverse().forEach(node => {
-                        if (!options.isNoControlsMode(node)) {
-                            controls.push(new ResizeControls(node))
-                        }
-                    })
+                    if(selectedNodes.size() == 1 && !options.isNoControlsMode(node)) {
+                        controls = new ResizeControls(selectedNodes);
+                    }
                 });
 
                 cy.on("remove", "node", eRemoveNode = function(e) {
@@ -1471,43 +1468,40 @@
 
                 // listens for position event and refreshGrapples if necessary
                 cy.on("position", "node", ePositionNode = function(e) {
-                    if(controls.length) {
-                      controls.forEach(control => {
+                    if(controls) {
                         // It seems that parent.position() doesn't always give consistent result.
                         // But calling it here makes the results consistent, by updating it to the correct value, somehow.
                         // Maybe there is some cache on cytoscape side preventing a position update.
-                        var trash_var = control.parent.position(); // trash_var isn't used, this line apparently makes position() correct
-                        if(e.target.id() == control.parent.id()) {
-                            control.update();
+                        var trash_var = controls.parent.position(); // trash_var isn't used, this line apparently makes position() correct
+                        if(e.target.id() == controls.parent.id()) {
+                            controls.update();
                         }
-                        // if the position of compound changes by repositioning its children's
+                        // if the position of compund changes by repositioning its children's
                         // Note: position event for compound is not triggered in this case
-                        else if(control.currentPos.x != control.oldPos.x || control.currentPos.y != control.oldPos.y) {
-                            control.currentPos = control.parent.position();
-                            control.update();
-                            control.oldPos = {x : control.currentPos.x, y : control.currentPos.y};
+                        else if(currentPos.x != oldPos.x || currentPos.y != oldPos.y) {
+                            currentPos = controls.parent.position();
+                            controls.update();
+                            oldPos = {x : currentPos.x, y : currentPos.y};
                         }
-                  })}
+                    }
                 });
 
                 cy.on("zoom", eZoom = function() {
-                    if ( controls.length ) {
-                        controls.forEach(control => { control.update() })
+                    if ( controls ) {
+                        controls.update();
                     }
                 });
 
                 cy.on("pan", ePan = function() {
-                    if ( controls.length ) {
-                        controls.forEach(control => { control.update() })
+                    if ( controls ) {
+                        controls.update();
                     }
                 });
 
                 cy.on("afterUndo afterRedo", eUndoRedo = function() {
-                    if ( controls.length ) {
-                        controls.forEach(control => { 
-                          control.update() 
-                          control.oldPos = {x: undefined, y: undefined};
-                        })
+                    if ( controls ) {
+                        controls.update();
+                        oldPos = {x: undefined, y: undefined};
                     }
                 });
 
@@ -1598,8 +1592,8 @@
                     // If this is the first time it means that resize is already performed through user interaction.
                     // In this case just removing the first time parameter is enough.
                     if (arg.firstTime) {
-                        if (controls.length) {
-                            controls.forEach(control => { control.update() }) // refresh grapplers after node resize
+                        if (controls) {
+                            controls.update(); // refresh grapplers after node resize
                         }
                         delete arg.firstTime;
                         return arg;
@@ -1648,8 +1642,8 @@
                     
                     cy.endBatch();
 
-                    if (controls.length) {
-                        controls.forEach(control => { control.update() }) // refresh grapplers after node resize
+                    if (controls) {
+                        controls.update(); // refresh grapplers after node resize
                     }
 
                     return result;
@@ -1687,25 +1681,19 @@
             var api = {}; // The extension api to be exposed
 
             api.refreshGrapples = function() {
-              if (controls.length) {
+              if (controls) {
                 // We need to remove old controls and create a new one rather then just updating controls
                 // We need this because the parent may change status and become resizable or not-resizable
-                controls.forEach(control => {
-                  var parent = control.parent;
-                  control.remove();
-                  controls = controls.filter(controlFilter => controlFilter !== control);
-                  controls.push(new ResizeControls(parent));
-                })
+                var parent = controls.parent;
+                controls.remove();
+                controls = new ResizeControls(parent);
               }
             }
-
             // Simply remove grapples even if node is selected
             api.removeGrapples = function() {
-              if (controls.length) {
-                controls.forEach(control=>{
-                  control.remove();
-                  control = [];
-                })
+              if (controls) {
+                controls.remove();
+                controls = null;
               }
             }
 
