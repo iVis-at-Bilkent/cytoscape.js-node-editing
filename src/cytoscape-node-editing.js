@@ -1429,7 +1429,7 @@
 
                     var selectedNodes = cy.nodes(':selected');
                     if(selectedNodes.size() == 1) {
-                      selectedNodes.reverse().forEach(node => {
+                      selectedNodes.toArray().reverse().forEach(node => {
                         controls.push(new ResizeControls(node))
                       })
                     }
@@ -1445,7 +1445,7 @@
 
                     var selectedNodes = cy.nodes(':selected');
 
-                    selectedNodes.reverse().forEach(node => {
+                    selectedNodes.toArray().reverse().forEach(node => {
                         if (!options.isNoControlsMode(node)) {
                             controls.push(new ResizeControls(node))
                         }
