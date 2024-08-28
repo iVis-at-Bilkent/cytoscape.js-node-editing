@@ -18,8 +18,8 @@ U. Dogrusoz , A. Karacelik, I. Safarli, H. Balci, L. Dervishi, and M.C. Siper, "
 
 Here are demos: **simple** and **undoable**, respectively:
 <p align="center">
-<a href="https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/unstable/demo.html" title="Simple"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo1.png" height=42px></a> &emsp;
-<a href="https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/unstable/undoable_demo.html" title="Undoable"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo2.png" height=42px></a>
+<a href="https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/demo.html" title="Simple"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo1.png" height=42px></a> &emsp;
+<a href="https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/undoable_demo.html" title="Undoable"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo2.png" height=42px></a>
 </p>
 
 ## Default Options
