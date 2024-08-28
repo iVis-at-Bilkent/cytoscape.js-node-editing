@@ -16,7 +16,11 @@ U. Dogrusoz , A. Karacelik, I. Safarli, H. Balci, L. Dervishi, and M.C. Siper, "
 
 ## Demo
 
-Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/demo.html) (simple) or [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/undoable_demo.html) (undoable) for demos
+Here are demos: **simple** and **undoable**, respectively:
+<p align="center">
+<a href="https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/unstable/demo.html" title="Simple"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo1.png" height=42px></a> &emsp;
+<a href="https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-node-editing/unstable/undoable_demo.html" title="Undoable"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo2.png" height=42px></a>
+</p>
 
 ## Default Options
 
@@ -27,6 +31,9 @@ Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-node-editing/demo.ht
     
                 grappleSize: 8, // size of square dots
                 grappleColor: "green", // color of grapples
+                grappleStrokeColor: "black", // stroke color of the grapples
+                grappleStrokeWidth: 0, // stroke width of the grapples
+                grappleCornerRadius: 0, // corner radius of the grapples
                 inactiveGrappleStroke: "inside 1px blue",               
                 boundingRectangleLineDash: [4, 8], // line dash of bounding rectangle
                 boundingRectangleLineColor: "red",
@@ -190,4 +197,8 @@ This project is set up to automatically be published to npm and bower.  To publi
 
 ## Team
 
-  * [Metin Can Siper](https://github.com/metincansiper), [Ahmet Candiroglu](https://github.com/ahmetcandiroglu), [Selim Firat Yilmaz](https://github.com/mrsfy), and [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
+  * [Muhammed Salih Altun](https://github.com/msalihaltun), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
+
+### Alumni
+
+  * [Metin Can Siper](https://github.com/metincansiper), [Ahmet Candiroglu](https://github.com/ahmetcandiroglu), [Selim Firat Yilmaz](https://github.com/mrsfy)
