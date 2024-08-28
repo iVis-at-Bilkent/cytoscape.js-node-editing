@@ -193,7 +193,7 @@ This project is set up to automatically be published to npm and bower.  To publi
 1. Bump the version number and tag: `npm version major|minor|patch`
 1. Push to origin: `git push && git push --tags`
 1. Publish to npm: `npm publish .`
-1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-edge-editing https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing.git`
+1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-node-editing https://github.com/iVis-at-Bilkent/cytoscape.js-node-editing.git`
 
 ## Team
 
