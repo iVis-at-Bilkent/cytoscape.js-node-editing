@@ -252,6 +252,9 @@
           return {
               padding: 5, // spacing between node and grapples/rectangle
               undoable: true, // and if cy.undoRedo exists
+              // Optional application state to preserve alongside resize dimensions
+              getResizeState: function (node) { return undefined; },
+              restoreResizeState: function (node, state) {},
 
               grappleSize: 8, // size of square dots
               grappleColor: "green", // color of grapples
@@ -1525,6 +1528,8 @@
                         }
                     };
                     
+                    param.resizeState = options.getResizeState(node);
+
                     // Some parts of param object are dependant on whether the node is a compound or simple node
                     if (node.isParent()) {
                       param.css.minWidth = parseFloat(options.getCompoundMinWidth(node));
@@ -1608,6 +1613,8 @@
                         }
                     };
                     
+                    result.resizeState = options.getResizeState(node);
+
                     // Some parts of result object is dependent on whether the node is simple or compound
                     if (node.isParent()) {
                       result.css.minWidth = parseFloat(options.getCompoundMinWidth(node));
@@ -1641,6 +1648,9 @@
                     }
                     
                     cy.endBatch();
+
+                    // Restore application state after dimensions and style listeners settle
+                    options.restoreResizeState(node, arg.resizeState);
 
                     if (controls) {
                         controls.update(); // refresh grapplers after node resize
